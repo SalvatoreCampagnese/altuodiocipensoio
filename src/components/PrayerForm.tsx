@@ -1,0 +1,306 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { LANGUAGES, RELIGIONS, TONES } from "@/lib/religions";
+
+type Mode = "checkout" | "redeem";
+
+const INTENTION_MAX = 1500;
+
+export function PrayerForm({
+  mode = "checkout",
+  defaultEmail = "",
+  lockEmail = false,
+  productId = "single",
+  priceLabel = "",
+  etaMinutes = 2,
+}: {
+  mode?: Mode;
+  defaultEmail?: string;
+  lockEmail?: boolean;
+  /** Prodotto da acquistare quando mode = "checkout". */
+  productId?: string;
+  /** Prezzo già formattato, mostrato sul bottone. */
+  priceLabel?: string;
+  /** Minuti dichiarati per la consegna. */
+  etaMinutes?: number;
+}) {
+  const router = useRouter();
+
+  const [religionId, setReligionId] = useState(RELIGIONS[0].id);
+  const [tradition, setTradition] = useState("");
+  const [prayerType, setPrayerType] = useState(RELIGIONS[0].prayerTypes[0].id);
+  const [intention, setIntention] = useState("");
+  const [recipient, setRecipient] = useState("");
+  const [language, setLanguage] = useState("it");
+  const [tone, setTone] = useState<string>("solenne");
+  const [scheduledFor, setScheduledFor] = useState("");
+  const [email, setEmail] = useState(defaultEmail);
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const religion = useMemo(
+    () => RELIGIONS.find((r) => r.id === religionId)!,
+    [religionId]
+  );
+
+  function onReligionChange(next: string) {
+    const r = RELIGIONS.find((x) => x.id === next)!;
+    setReligionId(next);
+    setTradition("");
+    // I tipi di preghiera cambiano con la tradizione: tieni il tipo se esiste ancora.
+    if (!r.prayerTypes.some((t) => t.id === prayerType)) {
+      setPrayerType(r.prayerTypes[0].id);
+    }
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (intention.trim().length < 10) {
+      setError("Scrivi almeno una frase sulla tua intenzione.");
+      return;
+    }
+
+    setSubmitting(true);
+
+    const draft = {
+      religion: religionId,
+      tradition: tradition || null,
+      prayer_type: prayerType,
+      intention: intention.trim(),
+      recipient_name: recipient.trim() || null,
+      language,
+      tone,
+      scheduled_for: scheduledFor ? new Date(scheduledFor).toISOString() : null,
+      email: email.trim(),
+    };
+
+    try {
+      if (mode === "redeem") {
+        const res = await fetch("/api/bundle/redeem", {
+          method: "POST",
+          headers: {"Content-Type":"application/json" },
+          body: JSON.stringify(draft),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "Qualcosa è andato storto");
+        router.push(`/preghiera/${data.prayerId}?token=${data.token}`);
+        return;
+      }
+
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {"Content-Type":"application/json" },
+        body: JSON.stringify({ productId, draft }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error ?? "Checkout non disponibile");
+      window.location.href = data.url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message :"Errore imprevisto");
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-8">
+      {/* 1 — Religione */}
+      <fieldset className="rounded-2xl border border-gold/15 bg-card p-6">
+        <legend className="px-2 font-display text-xl text-gold-deep">1 · La tua fede</legend>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-2 block text-sm text-ink-soft">Tradizione religiosa</span>
+            <select
+              className="field"
+              value={religionId}
+              onChange={(e) => onReligionChange(e.target.value)}
+            >
+              {RELIGIONS.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.emoji} {r.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {religion.traditions && (
+            <label className="block">
+              <span className="mb-2 block text-sm text-ink-soft">
+                Ramo o rito <span className="opacity-50">(facoltativo)</span>
+              </span>
+              <select
+                className="field"
+                value={tradition}
+                onChange={(e) => setTradition(e.target.value)}
+              >
+                <option value="">Non specifico</option>
+                {religion.traditions.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
+      </fieldset>
+
+      {/* 2 — Tipo di preghiera */}
+      <fieldset className="rounded-2xl border border-gold/15 bg-card p-6">
+        <legend className="px-2 font-display text-xl text-gold-deep">2 · Che preghiera serve</legend>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {religion.prayerTypes.map((t) => {
+            const active = prayerType === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setPrayerType(t.id)}
+                aria-pressed={active}
+                className={`rounded-xl border p-3 text-left transition-colors ${
+                  active
+                    ?"border-gold bg-gold/10"
+                    :"border-gold/15 hover:border-gold/40 hover:bg-white/[0.02]"
+                }`}
+              >
+                <span className="block text-sm font-medium text-ink">{t.label}</span>
+                <span className="mt-0.5 block text-xs leading-snug text-ink-soft">{t.hint}</span>
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      {/* 3 — Intenzione */}
+      <fieldset className="rounded-2xl border border-gold/15 bg-card p-6">
+        <legend className="px-2 font-display text-xl text-gold-deep">3 · La tua intenzione</legend>
+
+        <label className="mt-4 block">
+          <span className="mb-2 block text-sm text-ink-soft">
+            Scrivi con parole tue. Nomi, situazioni, dettagli: finiranno nel testo.
+          </span>
+          <textarea
+            className="field min-h-[160px] resize-y"
+            maxLength={INTENTION_MAX}
+            value={intention}
+            onChange={(e) => setIntention(e.target.value)}
+            placeholder="Mia madre Anna entra in sala operatoria giovedì mattina. Ha paura e io sono all'estero per lavoro, non riesco a starle vicino. Vorrei che qualcuno pregasse per lei mentre la operano."
+            required
+          />
+          <span className="mt-2 block text-right text-xs text-ink-soft/60">
+            {intention.length} / {INTENTION_MAX}
+          </span>
+        </label>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-2 block text-sm text-ink-soft">
+              Per chi è <span className="opacity-50">(facoltativo)</span>
+            </span>
+            <input
+              className="field"
+              value={recipient}
+              onChange={(e) => setRecipient(e.target.value)}
+              placeholder="Anna"
+              maxLength={80}
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm text-ink-soft">
+              Quando non potrai pregare <span className="opacity-50">(facoltativo)</span>
+            </span>
+            <input
+              type="datetime-local"
+              className="field"
+              value={scheduledFor}
+              onChange={(e) => setScheduledFor(e.target.value)}
+            />
+          </label>
+        </div>
+      </fieldset>
+
+      {/* 4 — Voce */}
+      <fieldset className="rounded-2xl border border-gold/15 bg-card p-6">
+        <legend className="px-2 font-display text-xl text-gold-deep">4 · Come va recitata</legend>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-2 block text-sm text-ink-soft">Tono</span>
+            <select className="field" value={tone} onChange={(e) => setTone(e.target.value)}>
+              {TONES.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label} — {t.hint}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm text-ink-soft">Lingua</span>
+            <select
+              className="field"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              {LANGUAGES.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </fieldset>
+
+      {/* 5 — Email */}
+      {!lockEmail && (
+        <fieldset className="rounded-2xl border border-gold/15 bg-card p-6">
+          <legend className="px-2 font-display text-xl text-gold-deep">5 · Dove te la mandiamo</legend>
+          <label className="mt-4 block">
+            <span className="mb-2 block text-sm text-ink-soft">La tua email</span>
+            <input
+              type="email"
+              className="field"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@esempio.it"
+              required
+            />
+          </label>
+        </fieldset>
+      )}
+
+      {error && (
+        <p className="rounded-xl border border-ember/40 bg-ember/10 px-4 py-3 text-sm text-ink">
+          {error}
+        </p>
+      )}
+
+      <button
+        type="submit"
+        disabled={submitting}
+        className="w-full rounded-xl btn-gold py-4 text-lg font-medium text-white  disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {submitting
+          ?"Un attimo…"
+          : mode === "redeem"
+            ?"Usa una preghiera del bundle"
+            : `Vai al pagamento${priceLabel ? ` — ${priceLabel}` : ""}`}
+      </button>
+
+      {mode === "checkout" && (
+        <p className="text-center text-xs text-ink-soft/60">
+          Pagamento sicuro con Stripe. La preghiera è pronta entro {etaMinutes}{" "}
+          {etaMinutes === 1 ? "minuto" : "minuti"} e ti arriva anche via email.
+        </p>
+      )}
+    </form>
+  );
+}

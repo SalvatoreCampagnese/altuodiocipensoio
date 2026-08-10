@@ -1,0 +1,334 @@
+@import "tailwindcss";
+
+@theme {
+  /* Superfici: bianco caldo, come pergamena colpita dal sole */
+  --color-paper: #fdfbf6;
+  --color-paper-warm: #f9f4ea;
+  --color-card: #ffffff;
+
+  /* Testo: nero caldo, mai nero puro */
+  --color-ink: #2b241d;
+  --color-ink-soft: #6b6055;
+
+  /* Oro: chiaro per i bagliori, profondo dove serve contrasto */
+  --color-gold: #b8862f;
+  --color-gold-deep: #8a6119;
+  --color-gold-soft: #e3c07a;
+  --color-halo: #fff4d6;
+  --color-ember: #b5541f;
+
+  --font-display: var(--font-serif), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  overflow-x: clip;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===========================================================================
+   LA LUCE
+   Due sorgenti negli angoli alti. Ognuna è un alone morbido più un ventaglio
+   di raggi (conic gradient mascherato) che respira lentamente.
+   =========================================================================== */
+
+.divine-light {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 130vh;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.divine-light__glow {
+  position: absolute;
+  top: -30vh;
+  height: 90vh;
+  width: 90vw;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0;
+  animation: glow-bloom 2.6s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+    glow-breathe 11s ease-in-out 2.6s infinite;
+}
+
+.divine-light__glow--left {
+  left: -30vw;
+  background: radial-gradient(
+    circle at 60% 60%,
+    rgba(255, 226, 158, 0.75),
+    rgba(255, 240, 205, 0.35) 45%,
+    transparent 70%
+  );
+}
+
+.divine-light__glow--right {
+  right: -30vw;
+  background: radial-gradient(
+    circle at 40% 60%,
+    rgba(255, 216, 170, 0.7),
+    rgba(255, 238, 210, 0.32) 45%,
+    transparent 70%
+  );
+  animation-delay: 0.35s, 3s;
+}
+
+.divine-light__rays {
+  position: absolute;
+  inset: -20vh -10vw;
+  opacity: 0;
+  animation: rays-bloom 3.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards,
+    rays-sway 24s ease-in-out 3.6s infinite;
+}
+
+.divine-light__rays--left {
+  background: repeating-conic-gradient(
+    from 24deg at 14% -8%,
+    rgba(214, 168, 76, 0.13) 0deg 1.6deg,
+    transparent 1.6deg 6.5deg
+  );
+  -webkit-mask-image: radial-gradient(60% 70% at 14% -8%, #000 10%, transparent 78%);
+  mask-image: radial-gradient(60% 70% at 14% -8%, #000 10%, transparent 78%);
+}
+
+.divine-light__rays--right {
+  background: repeating-conic-gradient(
+    from 236deg at 86% -8%,
+    rgba(214, 150, 76, 0.12) 0deg 1.4deg,
+    transparent 1.4deg 7deg
+  );
+  -webkit-mask-image: radial-gradient(60% 70% at 86% -8%, #000 10%, transparent 78%);
+  mask-image: radial-gradient(60% 70% at 86% -8%, #000 10%, transparent 78%);
+  animation-delay: 0.9s, 5s;
+}
+
+/* Velo che schiarisce il centro alto: fa "scendere" la luce sul contenuto */
+.divine-light__veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 250, 238, 0.55) 0%,
+    rgba(253, 251, 246, 0.35) 45%,
+    var(--color-paper) 100%
+  );
+}
+
+@keyframes glow-bloom {
+  from { opacity: 0; transform: scale(0.82) translateY(-4%); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes glow-breathe {
+  0%, 100% { opacity: 1;    transform: scale(1); }
+  50%      { opacity: 0.72; transform: scale(1.05); }
+}
+
+@keyframes rays-bloom {
+  from { opacity: 0; transform: scale(1.15) rotate(-3deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes rays-sway {
+  0%, 100% { transform: rotate(0deg)   scale(1); }
+  50%      { transform: rotate(1.6deg) scale(1.03); }
+}
+
+/* Sezione con un supplemento di luce dietro (hero, chiusure) */
+.sunlit {
+  position: relative;
+  background:
+    radial-gradient(ellipse 70% 50% at 12% 0%, rgba(255, 226, 158, 0.5), transparent 65%),
+    radial-gradient(ellipse 70% 50% at 88% 0%, rgba(255, 214, 165, 0.45), transparent 65%);
+}
+
+/* ===========================================================================
+   INGRESSI
+   =========================================================================== */
+
+.rise {
+  opacity: 0;
+  animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Rivelazione allo scroll: la classe .is-visible la accende (vedi Reveal.tsx) */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ===========================================================================
+   COMPONENTI
+   =========================================================================== */
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Bottone d'oro con lucentezza che attraversa al passaggio del mouse */
+.btn-gold {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-deep) 100%);
+  color: #fff;
+  box-shadow: 0 6px 20px -8px rgba(138, 97, 25, 0.6);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -10px rgba(138, 97, 25, 0.7);
+}
+
+.btn-gold::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 35%, rgba(255, 255, 255, 0.45) 50%, transparent 65%);
+  transform: translateX(-120%);
+}
+
+.btn-gold:hover::after {
+  animation: sheen 900ms ease-out;
+}
+
+@keyframes sheen {
+  to { transform: translateX(120%); }
+}
+
+.card {
+  background-color: var(--color-card);
+  border: 1px solid rgba(184, 134, 47, 0.18);
+  box-shadow: 0 1px 3px rgba(43, 36, 29, 0.04), 0 12px 32px -20px rgba(43, 36, 29, 0.18);
+  transition: box-shadow 300ms ease, transform 300ms ease, border-color 300ms ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+  border-color: rgba(184, 134, 47, 0.45);
+  box-shadow: 0 2px 6px rgba(43, 36, 29, 0.05), 0 20px 44px -22px rgba(43, 36, 29, 0.26);
+}
+
+.prayer-body {
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  line-height: 2;
+  white-space: pre-wrap;
+  color: var(--color-ink);
+}
+
+.prayer-body::first-letter {
+  font-size: 3.4rem;
+  line-height: 1;
+  float: left;
+  padding-right: 0.6rem;
+  padding-top: 0.35rem;
+  color: var(--color-gold-deep);
+  font-weight: 500;
+}
+
+.field {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(184, 134, 47, 0.28);
+  background-color: #fff;
+  padding: 0.75rem 1rem;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.field:focus {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 4px rgba(184, 134, 47, 0.14);
+}
+
+.field::placeholder {
+  color: rgba(107, 96, 85, 0.5);
+}
+
+/* ===========================================================================
+   ATTESA E RIVELAZIONE
+   Mentre la preghiera si scrive, la luce pulsa. Quando è pronta, esplode.
+   =========================================================================== */
+
+.halo-pulse {
+  animation: halo-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes halo-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.94); }
+  50%      { opacity: 1;    transform: scale(1.06); }
+}
+
+.revelation {
+  animation: revelation 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes revelation {
+  0%   { opacity: 0; transform: scale(0.96); filter: brightness(1.9) blur(6px); }
+  60%  { opacity: 1; filter: brightness(1.15) blur(0); }
+  100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+}
+
+.flare {
+  animation: flare 2.2s ease-out forwards;
+}
+
+@keyframes flare {
+  0%   { opacity: 0;    transform: scale(0.3); }
+  25%  { opacity: 0.95; transform: scale(1.25); }
+  100% { opacity: 0;    transform: scale(2.4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  .divine-light__glow,
+  .divine-light__rays,
+  .rise,
+  .revelation,
+  .flare,
+  .halo-pulse {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .btn-gold:hover { transform: none; }
+  .card-hover:hover { transform: none; }
+}
