@@ -17,12 +17,12 @@ const STEPS = [
   {
     n: "02",
     title: "Dicci per cosa",
-    text: "Un tipo di preghiera e la tua intenzione, con parole tue. Un nome, una situazione, una data. Più sei preciso, più la preghiera sarà tua.",
+    text: "Un tipo di preghiera e la tua intenzione, con parole tue. Un nome, una situazione, una data. Più sei preciso, più le parole saranno tue.",
   },
   {
     n: "03",
-    title: "Ascoltala",
-    text: "Entro pochi minuti ricevi il testo e la registrazione, sul sito e via email: una voce grave e posata che la recita per intero. Tua da riascoltare e da scaricare.",
+    title: "Pregala tu",
+    text: "Entro pochi minuti ricevi il testo, sul sito e via email. Puoi leggerlo in silenzio, dirlo ad alta voce, o farti accompagnare dalla voce registrata mentre lo segui. Chi prega, in ogni caso, sei tu.",
   },
 ];
 
@@ -44,24 +44,24 @@ export default function HomePage() {
             className="rise mt-8 text-sm uppercase tracking-[0.28em] text-gold-deep"
             style={{ animationDelay: "450ms" }}
           >
-            Preghiamo noi, quando tu non puoi
+            Le parole le mettiamo noi. La preghiera la fai tu.
           </p>
 
           <h1
             className="rise mt-5 text-balance font-display text-5xl leading-[1.08] text-ink sm:text-7xl"
             style={{ animationDelay: "650ms" }}
           >
-            C&apos;è sempre un momento in cui non riesci a pregare.
-            <span className="mt-3 block text-gold-deep">A quello ci pensiamo noi.</span>
+            C&apos;è sempre un momento in cui non trovi le parole.
+            <span className="mt-3 block text-gold-deep">Quelle te le troviamo noi.</span>
           </h1>
 
           <p
             className="rise mx-auto mt-8 max-w-xl text-balance text-lg leading-relaxed text-ink-soft"
             style={{ animationDelay: "850ms" }}
           >
-            Sei in turno di notte, in ospedale, in viaggio, o semplicemente non trovi le
-            parole. Scrivici la tua intenzione: la trasformiamo in una preghiera della tua
-            tradizione e te la recitiamo a voce.
+            Sei in turno di notte, in ospedale, in viaggio, o davanti a un dolore che non
+            sai come dire. Scrivici la tua intenzione: la mettiamo nella forma della tua
+            tradizione, e ti restituiamo un testo da pregare con le tue labbra.
           </p>
 
           <div
@@ -88,6 +88,43 @@ export default function HomePage() {
           >
             Pagamento unico. Nessun abbonamento che si rinnova.
           </p>
+        </div>
+      </section>
+
+      {/* Chi prega sei tu — l'obiezione affrontata prima che venga posta */}
+      <section className="border-t border-gold/12 bg-paper-warm/50 px-6 py-24">
+        <div className="mx-auto max-w-2xl">
+          <Reveal>
+            <h2 className="text-center font-display text-4xl text-ink sm:text-5xl">
+              Chi prega sei tu
+            </h2>
+            <p className="mt-8 text-lg leading-relaxed text-ink-soft">
+              Diciamolo subito, perché è la prima cosa che verrebbe da chiedere: qui non
+              c&apos;è nessuna macchina che prega al posto tuo. Una macchina non può pregare, e
+              noi non lo sosteniamo. Quello che facciamo è più antico e più modesto:{" "}
+              <strong className="font-medium text-ink">mettere per iscritto le parole</strong>{" "}
+              che in questo momento non riesci a trovare.
+            </p>
+            <p className="mt-5 text-lg leading-relaxed text-ink-soft">
+              È un mestiere che esiste da sempre. Il messale, il breviario, i libri d&apos;ore,
+              i libretti delle novene, il santino nel portafoglio: da secoli i credenti pregano
+              con parole scritte da altri, e nessuno ha mai pensato che fosse il messale a
+              pregare. La preghiera è l&apos;atto di chi la dice.
+            </p>
+            <p className="mt-5 text-lg leading-relaxed text-ink-soft">
+              Il testo che ricevi è un formulario, scritto su misura per la tua situazione
+              invece che per tutti. Poi sta a te: leggerlo, dirlo, tacerlo, cambiarlo,
+              buttarlo via. Non abbiamo alcun potere su quel passaggio, ed è giusto così.
+            </p>
+            <p className="mt-8 text-center">
+              <Link
+                href="/pregare-con-lintelligenza-artificiale"
+                className="underline underline-offset-4 hover:text-ink"
+              >
+                Si può pregare con un testo scritto dall&apos;intelligenza artificiale?
+              </Link>
+            </p>
+          </Reveal>
         </div>
       </section>
 
@@ -142,6 +179,36 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Archivio — l'ingresso gratuito, prima di qualsiasi prezzo */}
+      <section className="border-t border-gold/12 px-6 py-24">
+        <div className="mx-auto max-w-3xl text-center">
+          <Reveal>
+            <p className="text-sm uppercase tracking-[0.28em] text-gold-deep">
+              Gratis, e senza registrarsi
+            </p>
+            <h2 className="mt-5 font-display text-4xl text-ink sm:text-5xl">
+              Prima di tutto, le preghiere che esistono già
+            </h2>
+            <p className="mx-auto mt-5 max-w-xl leading-relaxed text-ink-soft">
+              Prima di scriverne una nuova, guarda quelle che venti secoli hanno già scritto.
+              Le abbiamo raccolte e ordinate per situazione — malattia, lutto, paura, viaggio,
+              perdono, ringraziamento — così le trovi quando servono. Sono libere, e lo
+              restano.
+            </p>
+            <Link
+              href="/preghiere-tradizionali"
+              className="mt-10 inline-block rounded-xl border border-gold/40 bg-card px-8 py-4 font-medium text-ink transition-all duration-300 hover:border-gold/70 hover:-translate-y-0.5"
+            >
+              Sfoglia l&apos;archivio
+            </Link>
+            <p className="mx-auto mt-6 max-w-lg text-sm leading-relaxed text-ink-soft/80">
+              Se nessuna dice la tua situazione — un nome, una data, una cosa che non entra in
+              nessuna formula — allora ha senso scriverne una.
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
       {/* Prezzi */}
       <section className="border-t border-gold/12 px-6 py-24">
         <div className="mx-auto max-w-5xl">
@@ -192,14 +259,14 @@ export default function HomePage() {
       <section className="sunlit border-t border-gold/12 px-6 py-28 text-center">
         <Reveal>
           <blockquote className="mx-auto max-w-2xl font-display text-3xl leading-snug text-ink-soft sm:text-4xl">
-            &ldquo;Non è che qualcuno preghi al posto tuo. È la tua intenzione, portata fino
-            in fondo anche quando tu non ce la fai.&rdquo;
+            &ldquo;Nessuno prega al posto tuo. Ti diamo solo le parole per farlo, nel giorno
+            in cui non ti vengono.&rdquo;
           </blockquote>
           <Link
             href="/nuova-preghiera"
             className="btn-gold mt-12 inline-block rounded-xl px-9 py-4 text-lg font-medium text-white"
           >
-            Accendi una candela — {formatPrice(single.amountCents)}
+            Scrivi la tua intenzione — {formatPrice(single.amountCents)}
           </Link>
         </Reveal>
       </section>

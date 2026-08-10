@@ -19,6 +19,12 @@ export async function SiteHeader() {
 
         <nav className="flex items-center gap-1 text-sm sm:gap-2">
           <Link
+            href="/preghiere-tradizionali"
+            className="hidden rounded-lg px-3 py-2 text-ink-soft transition-colors hover:text-ink sm:block"
+          >
+            Archivio
+          </Link>
+          <Link
             href="/lucernario"
             className="hidden rounded-lg px-3 py-2 text-ink-soft transition-colors hover:text-ink sm:block"
           >
@@ -49,7 +55,7 @@ export async function SiteHeader() {
             href="/nuova-preghiera"
             className="btn-gold rounded-lg px-4 py-2 font-medium text-white"
           >
-            Accendi una candela
+            Scrivi la tua intenzione
             <span className="ml-1.5 hidden opacity-85 sm:inline">
               {formatPrice(single.amountCents)}
             </span>

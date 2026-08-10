@@ -1,12 +1,23 @@
 # AlTuoDioCiPensoIO
 
-Preghiere personalizzate, scritte e recitate a voce, per i momenti in cui non
-riesci a pregare tu.
+Le parole per pregare, per i momenti in cui non ti vengono. **A pregarle è
+l'utente:** il servizio scrive formulari, non prega al posto di nessuno — e
+questa distinzione è il prodotto, non una nota legale. Se una modifica al copy
+la annacqua, è una regressione.
 
-L'utente sceglie la propria tradizione religiosa, il tipo di preghiera e scrive
-la sua intenzione. OpenAI compone il testo rispettando le formule di quella
-tradizione, ElevenLabs lo recita con una voce grave e posata, Stripe raccoglie
-l'offerta.
+Due strade, in quest'ordine:
+
+1. **L'archivio** (`/preghiere-tradizionali`) — le preghiere che la tradizione
+   ha già scritto, ordinate per situazione. Gratuito, senza registrazione. È
+   l'ingresso del funnel e la sezione che porta traffico organico.
+2. **Il testo su misura** (`/nuova-preghiera`) — quando nessuna formula
+   esistente dice quella situazione. OpenAI compone rispettando le formule
+   della tradizione scelta, ElevenLabs registra una voce che accompagna la
+   lettura, Stripe raccoglie l'offerta.
+
+L'obiezione «una macchina non può pregare» è affrontata per esteso in
+`/pregare-con-lintelligenza-artificiale`, che è insieme la risposta agli
+scettici e una pagina di acquisizione.
 
 **Stack:** Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 ·
 Supabase (auth, Postgres, Storage) · Stripe · OpenAI · ElevenLabs · Resend
@@ -31,6 +42,37 @@ PRODUCT_SINGLE_CENTS=390        # alza la singola a 3,90 €
 PRODUCT_TRIGESIMO_ENABLED=false # toglie il trigesimo dal sito
 LUCERNARIO_SLOTS=100            # raddoppia le candele
 ```
+
+---
+
+## L'archivio
+
+Il corpus sta in `src/lib/archive/texts.ts`, i tag (che sono situazioni della
+vita, non categorie teologiche) in `tags.ts`.
+
+**Nessuna pagina importa `ARCHIVE` direttamente.** Si passa sempre da
+`listArchive()`, che serve solo le voci `verificata` e con testo non vuoto: è
+il punto unico in cui si decide che cosa il mondo può leggere.
+
+Ogni voce nasce `da-rivedere` e passa a `verificata` solo dopo il confronto con
+la fonte — e per le tradizioni non cristiane solo dopo il controllo di una
+persona di quella tradizione. Le voci in attesa restano nel file, con nel
+`sourceNote` esattamente che cosa manca:
+
+```bash
+# quante voci aspettano revisione
+grep -c '"da-rivedere"' src/lib/archive/texts.ts
+# e che cosa manca a ciascuna
+grep -A2 '"da-rivedere"' src/lib/archive/texts.ts | grep MANCA
+```
+
+`pendingReview()` in `src/lib/archive/index.ts` restituisce lo stesso elenco a
+runtime, se serve mostrarlo da qualche parte.
+
+I due motivi ricorrenti sono i diritti sulle traduzioni bibliche (la versione
+CEI non è ripubblicabile: serve una traduzione di pubblico dominio o
+licenziata) e le tradizioni non cristiane, dove traslitterazione e resa vanno
+controllate da chi quel testo lo prega davvero.
 
 ---
 
@@ -237,6 +279,37 @@ sito e azzera lo stato in memoria. Al ritorno `/grazie` reindirizza attaccando
 
 Il divario fra `cta_landing`, `checkout_avviato` e `conversione` dice tre cose
 diverse: quale landing attira, quale convince a iniziare, quale porta soldi.
+
+### Consenso e dati particolari
+
+La tradizione religiosa che l'utente sceglie rivela le sue convinzioni; se
+scrive di una malattia, quello è un dato sulla salute. Sono entrambi dati
+dell'**art. 9 GDPR**, vietati salvo eccezioni — e l'eccezione su cui il servizio
+si fonda è il consenso esplicito.
+
+Da qui tre conseguenze nel codice, non solo nei testi:
+
+1. **Le caselle sono separate e mai pre-spuntate** (`ConsentBlock.tsx`). Un
+   consenso ai dati particolari raccolto insieme all'accettazione dei termini
+   non è né specifico né distinguibile, quindi non vale.
+2. **Il rifiuto è lato server.** `consentSchema` accetta solo `true`: una spunta
+   aggirata negli strumenti per sviluppatori non passa comunque.
+3. **La prova resta a database** con data e versione dei testi
+   (`007_consent.sql`). L'art. 7 par. 1 non chiede di raccogliere il consenso:
+   chiede di poter dimostrare di averlo raccolto, anche fra due anni.
+
+Il disclaimer su IA, voce sintetica e assenza di affiliazione sta **sopra il
+bottone di acquisto**, non nel footer: è dove l'utente decide di pagare.
+
+Dati del titolare, fornitori e tempi di conservazione stanno tutti in
+`src/lib/legal.ts`. Finché `HOLDER` è vuoto, ogni pagina legale e il footer
+mostrano un avviso visibile — il sito non deve poter andare online con
+un'informativa senza titolare. Stato completo e cosa manca: `docs/compliance.md`.
+
+**Nota sui fornitori.** Il piano Free di ElevenLabs non include la licenza
+commerciale, e questo servizio vende l'audio generato: serve almeno lo Starter.
+Il Creator è il primo piano su cui il catalogo sta in piedi, perché un trigesimo
+da solo consuma ~45.000 caratteri contro i 30.000 mensili dello Starter.
 
 ### Robustezza
 

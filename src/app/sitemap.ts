@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { INTENTION_LANDINGS, RELIGION_LANDINGS, siteUrl } from "@/lib/landings";
 import { intentionLandingPath, religionLandingPath } from "@/lib/landings";
+import { archivePath, archiveTagPath, listArchive, listTagsWithContent } from "@/lib/archive";
 
 /**
  * Sitemap.
@@ -14,13 +15,19 @@ import { intentionLandingPath, religionLandingPath } from "@/lib/landings";
 /** Pagine scritte a mano, con la priorità che gli diamo. */
 const STATIC: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "/", priority: 1, changeFrequency: "weekly" },
+  // L'archivio è l'ingresso gratuito e la sezione che porta traffico: sta
+  // sopra alle landing commerciali di proposito.
+  { path: "/preghiere-tradizionali", priority: 0.9, changeFrequency: "weekly" },
   { path: "/preghiere", priority: 0.9, changeFrequency: "weekly" },
   { path: "/preghiera-per", priority: 0.9, changeFrequency: "weekly" },
   { path: "/nuova-preghiera", priority: 0.8, changeFrequency: "monthly" },
   { path: "/pacchetti", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/pregare-con-lintelligenza-artificiale", priority: 0.7, changeFrequency: "monthly" },
   { path: "/come-funziona", priority: 0.6, changeFrequency: "monthly" },
   { path: "/lucernario", priority: 0.6, changeFrequency: "daily" },
   { path: "/privacy", priority: 0.2, changeFrequency: "yearly" },
+  { path: "/termini", priority: 0.2, changeFrequency: "yearly" },
+  { path: "/cookie", priority: 0.1, changeFrequency: "yearly" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -48,6 +55,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.8,
+    })),
+    // Le pagine-tag stanno sopra ai singoli testi: sono le pagine che
+    // rispondono a una query («preghiera per un malato»), mentre la singola
+    // preghiera risponde a una ricerca di navigazione già decisa.
+    ...listTagsWithContent().map((t) => ({
+      url: `${base}${archiveTagPath(t.slug)}`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
+    ...listArchive().map((p) => ({
+      url: `${base}${archivePath(p.slug)}`,
+      lastModified,
+      changeFrequency: "yearly" as const,
+      priority: 0.7,
     })),
   ];
 }

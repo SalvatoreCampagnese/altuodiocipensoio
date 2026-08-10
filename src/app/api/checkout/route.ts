@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/supabase/server";
 import { getProduct } from "@/lib/pricing";
 import { getStripe, lineItemFor } from "@/lib/stripe";
+import { LEGAL_VERSION } from "@/lib/legal";
 import { checkoutSchema, firstError } from "@/lib/validation";
 
 export const runtime = "nodejs";
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: firstError(parsed.error) }, { status: 400 });
   }
 
-  const { productId, draft } = parsed.data;
+  const { productId, draft, consent } = parsed.data;
 
   const product = getProduct(productId);
   if (!product) {
@@ -69,6 +70,16 @@ export async function POST(req: Request) {
       amount_cents: product.amountCents,
       currency: "eur",
       draft: product.credits === 1 ? draft : null,
+      // Prova del consenso, registrata insieme all'ordine cui si riferisce:
+      // l'art. 7 par. 1 GDPR chiede di poterlo dimostrare, non solo di averlo
+      // chiesto. `consentSchema` accetta solo `true`, quindi qui non arriva
+      // nulla di diverso.
+      consent_special_data: consent.specialData,
+      consent_terms: consent.terms,
+      consent_third_party: consent.thirdParty,
+      consent_immediate: consent.immediate,
+      consent_at: new Date().toISOString(),
+      consent_version: LEGAL_VERSION,
     })
     .select("id")
     .single<{ id: string }>();

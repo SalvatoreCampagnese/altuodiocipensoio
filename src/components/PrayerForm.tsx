@@ -4,6 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LANGUAGES, RELIGIONS, TONES } from "@/lib/religions";
 import { rememberLanding, trackCheckoutStarted } from "@/lib/track";
+import {
+  ConsentBlock,
+  EMPTY_CONSENT,
+  consentComplete,
+  type ConsentState,
+} from "@/components/ConsentBlock";
 
 type Mode = "checkout" | "redeem";
 
@@ -79,6 +85,8 @@ export function PrayerForm({
     if (landing) rememberLanding(landing);
   }, [landing]);
 
+  const [consent, setConsent] = useState<ConsentState>(EMPTY_CONSENT);
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,6 +111,14 @@ export function PrayerForm({
 
     if (intention.trim().length < 10) {
       setError("Scrivi almeno una frase sulla tua intenzione.");
+      return;
+    }
+
+    // Il server rifiuta comunque una richiesta senza consensi (`consentSchema`
+    // accetta solo `true`): questo controllo serve a dare un messaggio utile
+    // invece di un 400 secco.
+    if (!consentComplete(consent, mode)) {
+      setError("Per procedere devi spuntare tutte le dichiarazioni qui sopra.");
       return;
     }
 
@@ -136,7 +152,7 @@ export function PrayerForm({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: {"Content-Type":"application/json" },
-        body: JSON.stringify({ productId, draft }),
+        body: JSON.stringify({ productId, draft, consent }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error ?? "Checkout non disponibile");
@@ -322,6 +338,9 @@ export function PrayerForm({
           </label>
         </fieldset>
       )}
+
+      {/* Sopra il bottone, non nel footer: è qui che si decide di pagare. */}
+      <ConsentBlock value={consent} onChange={setConsent} mode={mode} />
 
       {error && (
         <p className="rounded-xl border border-ember/40 bg-ember/10 px-4 py-3 text-sm text-ink">

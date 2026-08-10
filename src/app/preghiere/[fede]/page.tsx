@@ -13,6 +13,7 @@ import {
   religionLandingPath,
   siteUrl,
 } from "@/lib/landings";
+import { archiveByReligion, archivePath } from "@/lib/archive";
 import { getReligion, languagesFor } from "@/lib/religions";
 import { formatPrice, getSingle } from "@/lib/pricing";
 
@@ -68,6 +69,10 @@ export default async function ReligionLandingPage({
 
   // Tre fedi vicine, per non lasciare la pagina senza uscite laterali.
   const siblings = RELIGION_LANDINGS.filter((l) => l.slug !== landing.slug).slice(0, 3);
+
+  // I testi d'archivio di questa tradizione. Molte fedi non ne hanno ancora:
+  // la sezione semplicemente non compare, invece di mostrarsi vuota.
+  const archived = archiveByReligion(landing.religionId);
 
   return (
     <div className="px-6 py-16">
@@ -194,6 +199,34 @@ export default async function ReligionLandingPage({
             })}
           </div>
         </section>
+
+        {/* Le preghiere già scritte di questa tradizione, prima di proporre
+            di scriverne una nuova: è l'ordine onesto, ed è anche quello che
+            tiene il visitatore sul sito invece di rimandarlo su Google. */}
+        {archived.length > 0 && (
+          <section className="mt-14">
+            <h2 className="font-display text-3xl text-gold-deep">
+              Le preghiere che questa tradizione ha già
+            </h2>
+            <p className="mt-4 leading-relaxed text-ink-soft">
+              Prima di comporne una nuova, vale la pena leggere queste: sono libere, gratuite e
+              per moltissime situazioni bastano.
+            </p>
+            <ul className="mt-6 space-y-3">
+              {archived.map((p) => (
+                <li key={p.slug}>
+                  <Link
+                    href={archivePath(p.slug)}
+                    className="block rounded-xl border border-gold/20 bg-paper-warm/40 px-5 py-4 transition-colors hover:border-gold/50"
+                  >
+                    <span className="font-display text-xl text-ink">{p.title}</span>
+                    <span className="mt-1 block text-sm text-ink-soft">{p.origin}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section className="mt-14">
           <h2 className="font-display text-3xl text-gold-deep">Domande</h2>
