@@ -1,12 +1,33 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LANGUAGES, RELIGIONS, TONES } from "@/lib/religions";
+import { rememberLanding, trackCheckoutStarted } from "@/lib/track";
 
 type Mode = "checkout" | "redeem";
 
 const INTENTION_MAX = 1500;
+
+/**
+ * Le precompilazioni arrivano da un URL, quindi da chiunque: si accettano solo
+ * se corrispondono a qualcosa che esiste davvero nel catalogo. Un valore
+ * inventato non deve mettere il form in uno stato impossibile.
+ */
+function validReligion(id?: string): string {
+  return RELIGIONS.some((r) => r.id === id) ? id! : RELIGIONS[0].id;
+}
+
+function validPrayerType(religionId: string, typeId?: string): string {
+  const religion = RELIGIONS.find((r) => r.id === religionId)!;
+  return religion.prayerTypes.some((t) => t.id === typeId)
+    ? typeId!
+    : religion.prayerTypes[0].id;
+}
+
+function validLanguage(id?: string): string {
+  return LANGUAGES.some((l) => l.id === id) ? id! : "it";
+}
 
 export function PrayerForm({
   mode = "checkout",
@@ -15,6 +36,10 @@ export function PrayerForm({
   productId = "single",
   priceLabel = "",
   etaMinutes = 2,
+  initialReligion,
+  initialPrayerType,
+  initialLanguage,
+  landing,
 }: {
   mode?: Mode;
   defaultEmail?: string;
@@ -25,18 +50,34 @@ export function PrayerForm({
   priceLabel?: string;
   /** Minuti dichiarati per la consegna. */
   etaMinutes?: number;
+  /** Precompilazioni che arrivano dalle landing (`?fede=`, `?intenzione=`, `?lingua=`). */
+  initialReligion?: string;
+  initialPrayerType?: string;
+  initialLanguage?: string;
+  /** Landing di provenienza (`?da=`), per attribuire la conversione. */
+  landing?: string;
 }) {
   const router = useRouter();
 
-  const [religionId, setReligionId] = useState(RELIGIONS[0].id);
+  const firstReligion = validReligion(initialReligion);
+
+  const [religionId, setReligionId] = useState(firstReligion);
   const [tradition, setTradition] = useState("");
-  const [prayerType, setPrayerType] = useState(RELIGIONS[0].prayerTypes[0].id);
+  const [prayerType, setPrayerType] = useState(
+    validPrayerType(firstReligion, initialPrayerType)
+  );
   const [intention, setIntention] = useState("");
   const [recipient, setRecipient] = useState("");
-  const [language, setLanguage] = useState("it");
+  const [language, setLanguage] = useState(validLanguage(initialLanguage));
   const [tone, setTone] = useState<string>("solenne");
   const [scheduledFor, setScheduledFor] = useState("");
   const [email, setEmail] = useState(defaultEmail);
+
+  // Parcheggia la provenienza: fra qui e la conversione c'è il checkout di
+  // Stripe, che porta l'utente fuori dal sito e azzera tutto lo stato.
+  useEffect(() => {
+    if (landing) rememberLanding(landing);
+  }, [landing]);
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,6 +140,11 @@ export function PrayerForm({
       });
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error ?? "Checkout non disponibile");
+
+      // Ultimo evento prima di perdere l'utente su Stripe: se poi non torna,
+      // il divario fra questo e `conversione` dice quanti si fermano al pagamento.
+      trackCheckoutStarted({ productId, religion: religionId });
+
       window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message :"Errore imprevisto");

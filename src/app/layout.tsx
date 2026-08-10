@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import Link from "next/link";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+import { ConversionTracker } from "@/components/ConversionTracker";
 import { DivineLight } from "@/components/DivineLight";
 import { SiteHeader } from "@/components/SiteHeader";
 
@@ -50,6 +53,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 Ogni fede, con lo stesso rispetto.
               </p>
               <nav className="flex flex-wrap gap-5">
+                {/* Le due hub stanno nel footer di ogni pagina: è così che il
+                    crawler raggiunge le 27 landing senza dipendere dalla sitemap. */}
+                <Link href="/preghiere" className="transition-colors hover:text-ink">
+                  Per tradizione
+                </Link>
+                <Link href="/preghiera-per" className="transition-colors hover:text-ink">
+                  Per intenzione
+                </Link>
                 <Link href="/come-funziona" className="transition-colors hover:text-ink">
                   Come funziona
                 </Link>
@@ -71,6 +82,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </p>
           </footer>
         </div>
+
+        {/* Senza cookie: non serve un banner di consenso. */}
+        <Analytics />
+
+        {/* Legge `?nuovo=` dall'URL, quindi va in Suspense: senza, l'intero
+            layout perderebbe il rendering statico. Non disegna nulla. */}
+        <Suspense fallback={null}>
+          <ConversionTracker />
+        </Suspense>
       </body>
     </html>
   );

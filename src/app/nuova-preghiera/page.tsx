@@ -11,9 +11,17 @@ export const metadata: Metadata = {
 export default async function NewPrayerPage({
   searchParams,
 }: {
-  searchParams: Promise<{ annullato?: string }>;
+  searchParams: Promise<{
+    annullato?: string;
+    /** Precompilazioni che arrivano dalle landing. */
+    fede?: string;
+    intenzione?: string;
+    lingua?: string;
+    /** Landing di provenienza, per l'attribuzione della conversione. */
+    da?: string;
+  }>;
 }) {
-  const { annullato } = await searchParams;
+  const { annullato, fede, intenzione, lingua, da } = await searchParams;
 
   const email = (await getSessionUser())?.email ?? "";
   const single = getSingle();
@@ -41,6 +49,10 @@ export default async function NewPrayerPage({
           defaultEmail={email}
           priceLabel={formatPrice(single.amountCents)}
           etaMinutes={eta}
+          initialReligion={fede}
+          initialPrayerType={intenzione}
+          initialLanguage={lingua}
+          landing={da}
         />
       </div>
     </div>

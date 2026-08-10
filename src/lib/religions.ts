@@ -237,16 +237,63 @@ export const TONES = [
   { id: "gioioso", label: "Gioioso", hint: "Di festa e ringraziamento" },
 ] as const;
 
-export const LANGUAGES = [
+/**
+ * Lingue in cui la preghiera può essere scritta e recitata.
+ *
+ * Non è un elenco generico di lingue diffuse: ognuna sta qui perché è la
+ * lingua in cui una delle tradizioni del catalogo prega davvero. `religions`
+ * dice quale, e serve alle landing per proporre la lingua giusta.
+ *
+ * `v3` marca le lingue che `eleven_multilingual_v2` NON copre: vengono
+ * instradate su `eleven_v3`. Vedi `pickModelId()` in elevenlabs.ts.
+ */
+export type Language = {
+  id: string;
+  label: string;
+  /** Serve `eleven_v3`: multilingual_v2 non supporta questa lingua. */
+  v3?: true;
+  /** Scrittura da destra a sinistra: il testo va reso con dir="rtl". */
+  rtl?: true;
+  /** Tradizioni per cui questa lingua è liturgica o d'uso comune. */
+  religions?: string[];
+};
+
+export const LANGUAGES: Language[] = [
   { id: "it", label: "Italiano" },
   { id: "en", label: "English" },
   { id: "es", label: "Español" },
   { id: "fr", label: "Français" },
-  { id: "pt", label: "Português" },
+  { id: "pt", label: "Português", religions: ["cattolica", "protestante"] },
   { id: "de", label: "Deutsch" },
-  { id: "ar", label: "العربية" },
-  { id: "ro", label: "Română" },
-] as const;
+  { id: "pl", label: "Polski", religions: ["cattolica"] },
+  { id: "fil", label: "Filipino", religions: ["cattolica"] },
+  { id: "ro", label: "Română", religions: ["ortodossa"] },
+  { id: "ru", label: "Русский", religions: ["ortodossa"] },
+  { id: "uk", label: "Українська", religions: ["ortodossa"] },
+  { id: "el", label: "Ελληνικά", religions: ["ortodossa"] },
+  { id: "ar", label: "العربية", rtl: true, religions: ["islam", "ortodossia-copta"] },
+  { id: "tr", label: "Türkçe", religions: ["islam"] },
+  { id: "id", label: "Bahasa Indonesia", religions: ["islam"] },
+  { id: "ur", label: "اردو", v3: true, rtl: true, religions: ["islam"] },
+  { id: "fa", label: "فارسی", v3: true, rtl: true, religions: ["islam"] },
+  { id: "he", label: "עברית", v3: true, rtl: true, religions: ["ebraismo"] },
+  { id: "hi", label: "हिन्दी", religions: ["induismo", "jainismo"] },
+  { id: "ta", label: "தமிழ்", religions: ["induismo"] },
+  { id: "pa", label: "ਪੰਜਾਬੀ", v3: true, religions: ["sikhismo"] },
+  { id: "zh", label: "中文", religions: ["taoismo", "buddhismo"] },
+  { id: "ja", label: "日本語", religions: ["shintoismo", "buddhismo"] },
+  { id: "ko", label: "한국어", religions: ["buddhismo"] },
+  { id: "vi", label: "Tiếng Việt", v3: true, religions: ["buddhismo"] },
+];
+
+export function getLanguage(id: string): Language | undefined {
+  return LANGUAGES.find((l) => l.id === id);
+}
+
+/** Le lingue in cui una tradizione prega, la prima è quella da proporre. */
+export function languagesFor(religionId: string): Language[] {
+  return LANGUAGES.filter((l) => l.religions?.includes(religionId));
+}
 
 export function getReligion(id: string): Religion | undefined {
   return RELIGIONS.find((r) => r.id === id);

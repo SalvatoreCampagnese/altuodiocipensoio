@@ -210,6 +210,34 @@ leggibile da chiunque abbia accesso al database.
 Resta una dipendenza da Vercel: `maxDuration = 300` sulla route, che è l'unica
 cosa a limitare la durata di un giro.
 
+### Le landing indicizzabili
+
+Il traffico non arriva cercando «AlTuoDioCiPensoIO»: arriva cercando «preghiera
+per la guarigione» o «duʿāʾ per un esame». Le landing esistono per intercettarlo.
+
+**Due assi separati, mai incrociati.** `/preghiere/[fede]` sono 15 pagine, una
+per tradizione. `/preghiera-per/[intenzione]` sono 12 pagine, una per bisogno.
+Il prodotto cartesiano — 15 × 12 = 180 pagine tipo «preghiera di guarigione
+cattolica» — è escluso di proposito: sarebbero varianti dello stesso testo col
+nome della fede sostituito, cioè il pattern che la policy **Scaled Content
+Abuse** di Google colpisce dal 2024 e su cui ha emesso manual action a giugno
+2025. L'incrocio vive come *sezione* dentro la pagina della tradizione, dove ha
+contenuto suo.
+
+La regola per chi aggiunge una landing sta in `src/lib/landings/types.ts`: se il
+testo che stai scrivendo funzionerebbe anche per un'altra fede cambiando due
+parole, non scriverlo.
+
+**Come si misura quale funziona.** Ogni CTA porta `?da=<landing>` nell'URL. Il
+form parcheggia quel valore in `localStorage` (`src/lib/track.ts`) perché fra il
+clic e la conversione c'è il checkout di Stripe, che porta l'utente fuori dal
+sito e azzera lo stato in memoria. Al ritorno `/grazie` reindirizza attaccando
+`?nuovo=<prodotto>`, e `ConversionTracker` — montato nel layout, non su
+`/grazie`, che quasi sempre reindirizza — emette l'evento `conversione`.
+
+Il divario fra `cta_landing`, `checkout_avviato` e `conversione` dice tre cose
+diverse: quale landing attira, quale convince a iniziare, quale porta soldi.
+
 ### Robustezza
 
 - **Doppio canale di fulfillment.** Il webhook è il canale primario; la pagina
@@ -262,8 +290,13 @@ src/
       prayers/[id]/generate/     pipeline di generazione
       bundle/redeem/             consuma un credito
       lucernario/                offerta libera e accensione candela
+    preghiere/                   hub + 15 landing per tradizione (SEO)
+    preghiera-per/               hub + 12 landing per intenzione (SEO)
+    sitemap.ts, robots.ts        indicizzazione
   components/                    form, player, header, candela
   lib/
+    landings/                    contenuti delle landing indicizzabili
+    track.ts                     attribuzione conversione → landing
     religions.ts                 catalogo tradizioni + guidance per il modello
     openai.ts                    system prompt e composizione del testo
     elevenlabs.ts                sintesi vocale e scelta della voce

@@ -1,10 +1,18 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fulfillBySessionId } from "@/lib/fulfillment";
 import { Candle } from "@/components/Candle";
 
 export const dynamic = "force-dynamic";
+
+// Pagina di passaggio dopo il pagamento: non ha senso in SERP e porterebbe
+// visitatori su un vicolo cieco senza session_id.
+export const metadata: Metadata = {
+  title: "Grazie — AlTuoDioCiPensoIO",
+  robots: { index: false, follow: false },
+};
 
 /**
  * Ponte fra Stripe e la preghiera. Non si limita ad aspettare il webhook:
@@ -28,7 +36,9 @@ export default async function ThankYouPage({
     if (!result) {
       message = "Il pagamento risulta ancora in elaborazione. Appena viene confermato ti mandiamo la preghiera via email.";
     } else if (result.order.product_id === "lucernario") {
-      redirect(result.candleSlot ? "/lucernario?accesa=1" : "/lucernario");
+      // `nuovo` è il segnale che ConversionTracker aspetta: da qui in poi
+      // reindirizziamo, e senza questo parametro la conversione andrebbe persa.
+      redirect(result.candleSlot ? "/lucernario?accesa=1&nuovo=lucernario" : "/lucernario?nuovo=lucernario");
     } else if (result.prayerId) {
       const db = createAdminClient();
       const { data } = await db
@@ -37,9 +47,11 @@ export default async function ThankYouPage({
         .eq("id", result.prayerId)
         .single<{ access_token: string }>();
 
-      redirect(`/preghiera/${result.prayerId}?token=${data?.access_token ?? ""}`);
+      redirect(
+        `/preghiera/${result.prayerId}?token=${data?.access_token ?? ""}&nuovo=${result.order.product_id}`
+      );
     } else {
-      redirect("/dashboard?bundle=1");
+      redirect(`/dashboard?bundle=1&nuovo=${result.order.product_id}`);
     }
   } catch (err) {
     // `redirect()` lancia per progetto: rilancia senza trattarlo come errore.
