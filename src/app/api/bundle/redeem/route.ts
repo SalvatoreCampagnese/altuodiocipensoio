@@ -91,6 +91,8 @@ export async function POST(req: Request) {
       tone: draft.tone,
       scheduled_for: draft.scheduled_for ?? null,
       status: "queued",
+      sequence_index: usable.used_credits + 1,
+      sequence_total: usable.total_credits,
     })
     .select("id, access_token")
     .single<{ id: string; access_token: string }>();
@@ -102,6 +104,32 @@ export async function POST(req: Request) {
       .update({ used_credits: usable.used_credits })
       .eq("id", usable.id);
     return NextResponse.json({ error: `Creazione fallita: ${error?.message}` }, { status: 500 });
+  }
+
+  // La prima preghiera del pacchetto diventa il modello delle successive:
+  // una novena è la stessa intenzione ripetuta per nove giorni, non nove
+  // preghiere diverse. Da qui in poi il cron le manda da solo.
+  const today = new Date().toISOString().slice(0, 10);
+
+  if (!usable.template) {
+    await db
+      .from("bundles")
+      .update({
+        template: {
+          religion: draft.religion,
+          tradition: draft.tradition ?? null,
+          prayer_type: draft.prayer_type,
+          intention: draft.intention,
+          recipient_name: draft.recipient_name ?? null,
+          language: draft.language,
+          tone: draft.tone,
+          email,
+        },
+        last_delivered_on: today,
+      })
+      .eq("id", usable.id);
+  } else {
+    await db.from("bundles").update({ last_delivered_on: today }).eq("id", usable.id);
   }
 
   return NextResponse.json({ prayerId: prayer.id, token: prayer.access_token });

@@ -38,6 +38,9 @@ export type Prayer = {
   error_message: string | null;
   attempts: number;
   last_attempt_at: string | null;
+  /** Posizione nella sequenza del pacchetto: "3 di 9". */
+  sequence_index: number | null;
+  sequence_total: number | null;
   access_token: string;
   created_at: string;
   updated_at: string;
@@ -56,6 +59,12 @@ export type Bundle = {
   used_credits: number;
   starts_at: string;
   created_at: string;
+  /** Consegna automatica della preghiera del giorno. */
+  auto_deliver: boolean;
+  /** Modello ricavato dalla prima preghiera: le successive nascono da qui. */
+  template: PrayerDraft | null;
+  /** Giorno dell'ultima consegna automatica, per l'idempotenza del cron. */
+  last_delivered_on: string | null;
 };
 
 export type Order = {

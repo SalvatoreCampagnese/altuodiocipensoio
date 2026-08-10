@@ -57,6 +57,15 @@ export async function writePrayer(prayer: Prayer): Promise<GeneratedPrayer> {
     `Lingua del testo: ${language}. Scrivi TUTTO, titolo compreso, in questa lingua.`,
     prayer.recipient_name ? `La preghiera è per: ${prayer.recipient_name}. Nominalo/a esplicitamente almeno due volte.` : null,
     when ? `Sarà recitata il: ${when}. Puoi accennare al momento, con discrezione.` : null,
+    prayer.sequence_index && prayer.sequence_total && prayer.sequence_total > 1
+      ? `Questa è la preghiera ${prayer.sequence_index} di ${prayer.sequence_total} di una devozione continuata. ` +
+        `Riprendi la stessa intenzione ma con parole nuove: non ripetere il testo dei giorni precedenti. ` +
+        (prayer.sequence_index === 1
+          ? "È la prima: apri il cammino."
+          : prayer.sequence_index === prayer.sequence_total
+            ? "È l'ultima: chiudi il cammino e affida l'esito."
+            : "È una delle intermedie: tieni viva la perseveranza.")
+      : null,
     ``,
     `Intenzione scritta dall'utente (rispettala alla lettera, è il cuore del testo):`,
     `"""`,

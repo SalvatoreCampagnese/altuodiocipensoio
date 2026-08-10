@@ -157,6 +157,50 @@ libero. Se fra la scelta e il pagamento qualcun altro occupa la stessa
 postazione, `lightCandle()` ne assegna un'altra libera invece di far perdere
 l'offerta.
 
+### Consegna automatica (il cron)
+
+Novena e trigesimo vivono nella ripetizione: senza automatismo l'utente
+dovrebbe venirsi a prendere il credito a mano ogni giorno, e il prodotto
+perderebbe il suo senso.
+
+**La prima preghiera del pacchetto diventa il modello.** L'utente la scrive
+normalmente dalla dashboard; `bundles.template` la conserva e da lì in poi le
+successive nascono da sola. È la logica del rito: una novena è la stessa
+intenzione ripetuta nove giorni, non nove preghiere diverse. Il prompt riceve
+anche la posizione nella sequenza (`sequence_index` / `sequence_total`), così
+la prima apre il cammino, le intermedie tengono la perseveranza e l'ultima
+chiude e affida l'esito.
+
+`GET|POST /api/cron/prayers` fa un giro in due tempi:
+
+1. **Accoda** — per ogni pacchetto con consegna automatica attiva, modello
+   salvato, almeno un credito sbloccato e nessuna consegna oggi, scala il
+   credito e crea la preghiera in stato `queued`.
+2. **Svuota** — genera fino a `CRON_BATCH_SIZE` preghiere in coda, fermandosi
+   con 60 s di margine sul budget per non farsi uccidere a metà.
+
+Il secondo passo raccoglie anche le preghiere rimesse in coda da un tentativo
+fallito: **il cron è la rete di sicurezza di tutto il sistema**, non solo dei
+pacchetti. Chi chiude la pagina prima che la generazione finisca la riceve
+comunque via email.
+
+Il giro è idempotente — `bundles.last_delivered_on` blocca i doppioni — quindi
+può girare ogni quarto d'ora senza danni.
+
+L'utente può sospendere tutto con l'interruttore in dashboard
+(`bundles.auto_deliver`): i crediti restano suoi e li usa a mano quando vuole.
+
+**Perché Vercel Cron e non pg_cron.** Il lavoro vero (OpenAI, ElevenLabs,
+Storage, email) sta in TypeScript con gli SDK già collegati. pg_cron esegue
+SQL: non può chiamare quei servizi da solo, quindi finirebbe comunque per fare
+una HTTP call al nostro endpoint — cioè la stessa cosa, con un pezzo in più da
+mantenere. Se non sei su Vercel, lo snippet pg_cron + pg_net è pronto in
+`supabase/migrations/005_auto_delivery.sql`: stesso endpoint, stesso token.
+
+Pianificazione in `vercel.json`: ogni 15 minuti fra le 6 e le 22.
+Attenzione: **il piano Hobby di Vercel consente un solo cron al giorno**, serve
+il Pro (che ti serve comunque per `maxDuration`).
+
 ### Robustezza
 
 - **Doppio canale di fulfillment.** Il webhook è il canale primario; la pagina
@@ -219,10 +263,13 @@ src/
     types.ts                     tipi + logica dei crediti a cadenza
     pricing.ts                   listino e Lucernario, letti dalle env
     lucernario.ts                stato della parete e accensione candele
+    scheduler.ts                 accodamento e svuotamento della coda (cron)
     mailer.ts                    consegna via email (Resend)
     alerts.ts                    allerte su Supabase + email al gestore
 supabase/schema.sql              tabelle, RLS, bucket
-supabase/migrations/             002 prodotti, 003 lucernario, 004 allerte
+supabase/migrations/             002 prodotti · 003 lucernario · 004 allerte
+                                 005 consegna automatica
+vercel.json                      pianificazione del cron
 ```
 
 ---

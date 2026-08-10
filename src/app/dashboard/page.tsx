@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { Candle } from "@/components/Candle";
 import { SignOutButton } from "@/components/SignOutButton";
+import { AutoDeliveryToggle } from "@/components/AutoDeliveryToggle";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/supabase/server";
 import { getPrayerType, getReligion } from "@/lib/religions";
@@ -131,6 +132,28 @@ export default async function DashboardPage({
                   Comprane una a {formatPrice(single.amountCents)}
                 </Link>
               )}
+            </div>
+          )}
+
+          {/* Consegna automatica, un interruttore per pacchetto */}
+          {packs.length > 0 && (
+            <div className="mt-6 space-y-4 border-t border-gold/15 pt-6">
+              {packs
+                .filter((b) => b.total_credits - b.used_credits > 0)
+                .map((b) => (
+                  <div key={b.id}>
+                    {packs.length > 1 && (
+                      <p className="mb-1.5 text-xs uppercase tracking-wider text-ink-soft/70">
+                        {b.product_name ?? b.product_id}
+                      </p>
+                    )}
+                    <AutoDeliveryToggle
+                      bundleId={b.id}
+                      enabled={b.auto_deliver}
+                      hasTemplate={Boolean(b.template)}
+                    />
+                  </div>
+                ))}
             </div>
           )}
         </section>
