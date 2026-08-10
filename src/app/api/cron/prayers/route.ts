@@ -9,9 +9,9 @@ export const maxDuration = 300;
 /**
  * Consegna automatica dei pacchetti.
  *
- * Lo chiama Vercel Cron (vedi `vercel.json`) oppure pg_cron da Supabase
- * (snippet in `supabase/migrations/005_auto_delivery.sql`). In entrambi i casi
- * l'autenticazione è lo stesso bearer token.
+ * Lo chiama pg_cron da Supabase, ogni 15 minuti fra le 6 e le 22 di Roma:
+ * vedi `supabase/migrations/006_pg_cron_delivery.sql`. Il bearer token è il
+ * `CRON_SECRET`, che il job legge dal Vault di Supabase.
  *
  * Il giro è idempotente: può girare ogni quarto d'ora senza creare doppioni,
  * perché ogni pacchetto segna il giorno in cui ha già consegnato.
@@ -48,6 +48,6 @@ async function handle(req: Request) {
   }
 }
 
-// Vercel Cron invia GET; pg_net è più comodo in POST. Accettiamo entrambi.
+// pg_net chiama in POST; il GET resta per poter provare il giro a mano.
 export const GET = handle;
 export const POST = handle;

@@ -32,27 +32,7 @@ create index if not exists prayers_queue_idx
   where status in ('queued', 'failed');
 
 -- ===========================================================================
--- ALTERNATIVA a Vercel Cron: pg_cron + pg_net, se non sei su Vercel.
--- Fa la stessa cosa — chiama l'endpoint dell'app — solo da dentro Postgres.
--- Scommenta, sostituisci dominio e CRON_SECRET, ed esegui.
+-- La pianificazione del cron sta nella migrazione 006 (pg_cron + pg_net).
+-- Qui c'era uno snippet commentato con lo stesso nome di job: rimosso per non
+-- lasciare in giro un duplicato che, se scommentato, litigherebbe con 006.
 -- ===========================================================================
---
--- create extension if not exists pg_cron;
--- create extension if not exists pg_net;
---
--- select cron.schedule(
---   'preghiere-automatiche',
---   '*/15 * * * *',
---   $$
---     select net.http_post(
---       url     := 'https://tuodominio.it/api/cron/prayers',
---       headers := jsonb_build_object(
---         'Content-Type',  'application/json',
---         'Authorization', 'Bearer IL_TUO_CRON_SECRET'
---       )
---     );
---   $$
--- );
---
--- -- per fermarlo:  select cron.unschedule('preghiere-automatiche');
--- -- per guardarlo: select * from cron.job_run_details order by start_time desc limit 20;

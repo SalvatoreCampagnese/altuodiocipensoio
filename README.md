@@ -190,16 +190,25 @@ può girare ogni quarto d'ora senza danni.
 L'utente può sospendere tutto con l'interruttore in dashboard
 (`bundles.auto_deliver`): i crediti restano suoi e li usa a mano quando vuole.
 
-**Perché Vercel Cron e non pg_cron.** Il lavoro vero (OpenAI, ElevenLabs,
-Storage, email) sta in TypeScript con gli SDK già collegati. pg_cron esegue
-SQL: non può chiamare quei servizi da solo, quindi finirebbe comunque per fare
-una HTTP call al nostro endpoint — cioè la stessa cosa, con un pezzo in più da
-mantenere. Se non sei su Vercel, lo snippet pg_cron + pg_net è pronto in
-`supabase/migrations/005_auto_delivery.sql`: stesso endpoint, stesso token.
+**Perché pg_cron e non Vercel Cron.** Il piano Hobby di Vercel consente **un
+solo cron al giorno**: troppo poco per una coda che va svuotata a più riprese,
+e che è anche la rete di sicurezza delle generazioni fallite. pg_cron gira
+dentro Postgres senza limiti di piano.
 
-Pianificazione in `vercel.json`: ogni 15 minuti fra le 6 e le 22.
-Attenzione: **il piano Hobby di Vercel consente un solo cron al giorno**, serve
-il Pro (che ti serve comunque per `maxDuration`).
+A spostarsi è solo la *pianificazione*, non l'*esecuzione*: il lavoro vero
+(OpenAI, ElevenLabs, Storage, email) resta in TypeScript con gli SDK già
+collegati, e pg_net si limita a chiamare lo stesso endpoint con lo stesso
+bearer token. Il codice dell'applicazione non cambia di una riga.
+
+Pianificazione in `supabase/migrations/006_pg_cron_delivery.sql`: ogni 15
+minuti, ma solo fra le 6 e le 22 di Roma. La finestra oraria sta nel corpo del
+job e non nell'espressione cron perché pg_cron ragiona in UTC — con
+`at time zone 'Europe/Rome'` l'ora legale si sposta da sola. Il `CRON_SECRET`
+sta nel Vault di Supabase, non nella definizione del job: `cron.job` è
+leggibile da chiunque abbia accesso al database.
+
+Resta una dipendenza da Vercel: `maxDuration = 300` sulla route, che è l'unica
+cosa a limitare la durata di un giro.
 
 ### Robustezza
 
@@ -269,7 +278,7 @@ src/
 supabase/schema.sql              tabelle, RLS, bucket
 supabase/migrations/             002 prodotti · 003 lucernario · 004 allerte
                                  005 consegna automatica
-vercel.json                      pianificazione del cron
+                                 006 pianificazione del cron (pg_cron)
 ```
 
 ---
