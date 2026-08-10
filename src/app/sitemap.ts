@@ -21,6 +21,8 @@ const STATIC: { path: string; priority: number; changeFrequency: MetadataRoute.S
   { path: "/come-funziona", priority: 0.6, changeFrequency: "monthly" },
   { path: "/lucernario", priority: 0.6, changeFrequency: "daily" },
   { path: "/privacy", priority: 0.2, changeFrequency: "yearly" },
+  { path: "/termini", priority: 0.2, changeFrequency: "yearly" },
+  { path: "/cookie", priority: 0.1, changeFrequency: "yearly" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

@@ -7,6 +7,7 @@ import "./globals.css";
 import { ConversionTracker } from "@/components/ConversionTracker";
 import { DivineLight } from "@/components/DivineLight";
 import { SiteHeader } from "@/components/SiteHeader";
+import { HOLDER, legalDataMissing } from "@/lib/legal";
 
 const serif = Cormorant_Garamond({
   subsets: ["latin"],
@@ -70,15 +71,42 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/pacchetti" className="transition-colors hover:text-ink">
                   I pacchetti
                 </Link>
+                <Link href="/termini" className="transition-colors hover:text-ink">
+                  Termini
+                </Link>
                 <Link href="/privacy" className="transition-colors hover:text-ink">
                   Privacy
+                </Link>
+                <Link href="/cookie" className="transition-colors hover:text-ink">
+                  Cookie
                 </Link>
               </nav>
             </div>
             <p className="mx-auto mt-6 max-w-5xl text-xs leading-relaxed opacity-70">
               Le preghiere sono composte con l&apos;assistenza dell&apos;intelligenza artificiale e
               recitate da una voce sintetica. Il servizio non è affiliato ad alcuna istituzione
-              o autorità religiosa e non sostituisce i riti officiati dai ministri di culto.
+              o autorità religiosa e non sostituisce i riti officiati dai ministri di culto, né
+              il sostegno psicologico o le cure mediche.
+            </p>
+
+            {/* Obblighi informativi per il commercio elettronico: identità,
+                sede e contatti devono essere accessibili da ogni pagina. */}
+            <p className="mx-auto mt-4 max-w-5xl text-xs leading-relaxed opacity-60">
+              {legalDataMissing() ? (
+                <span className="text-ember">
+                  Dati del titolare da completare in src/lib/legal.ts prima della pubblicazione.
+                </span>
+              ) : (
+                <>
+                  {HOLDER.name}
+                  {HOLDER.form && ` — ${HOLDER.form}`} · {HOLDER.address} · P. IVA {HOLDER.vat}
+                  {HOLDER.rea && ` · REA ${HOLDER.rea}`} ·{" "}
+                  <a href={`mailto:${HOLDER.email}`} className="hover:text-ink">
+                    {HOLDER.email}
+                  </a>
+                  {HOLDER.pec && ` · PEC ${HOLDER.pec}`}
+                </>
+              )}
             </p>
           </footer>
         </div>

@@ -238,6 +238,37 @@ sito e azzera lo stato in memoria. Al ritorno `/grazie` reindirizza attaccando
 Il divario fra `cta_landing`, `checkout_avviato` e `conversione` dice tre cose
 diverse: quale landing attira, quale convince a iniziare, quale porta soldi.
 
+### Consenso e dati particolari
+
+La tradizione religiosa che l'utente sceglie rivela le sue convinzioni; se
+scrive di una malattia, quello è un dato sulla salute. Sono entrambi dati
+dell'**art. 9 GDPR**, vietati salvo eccezioni — e l'eccezione su cui il servizio
+si fonda è il consenso esplicito.
+
+Da qui tre conseguenze nel codice, non solo nei testi:
+
+1. **Le caselle sono separate e mai pre-spuntate** (`ConsentBlock.tsx`). Un
+   consenso ai dati particolari raccolto insieme all'accettazione dei termini
+   non è né specifico né distinguibile, quindi non vale.
+2. **Il rifiuto è lato server.** `consentSchema` accetta solo `true`: una spunta
+   aggirata negli strumenti per sviluppatori non passa comunque.
+3. **La prova resta a database** con data e versione dei testi
+   (`007_consent.sql`). L'art. 7 par. 1 non chiede di raccogliere il consenso:
+   chiede di poter dimostrare di averlo raccolto, anche fra due anni.
+
+Il disclaimer su IA, voce sintetica e assenza di affiliazione sta **sopra il
+bottone di acquisto**, non nel footer: è dove l'utente decide di pagare.
+
+Dati del titolare, fornitori e tempi di conservazione stanno tutti in
+`src/lib/legal.ts`. Finché `HOLDER` è vuoto, ogni pagina legale e il footer
+mostrano un avviso visibile — il sito non deve poter andare online con
+un'informativa senza titolare. Stato completo e cosa manca: `docs/compliance.md`.
+
+**Nota sui fornitori.** Il piano Free di ElevenLabs non include la licenza
+commerciale, e questo servizio vende l'audio generato: serve almeno lo Starter.
+Il Creator è il primo piano su cui il catalogo sta in piedi, perché un trigesimo
+da solo consuma ~45.000 caratteri contro i 30.000 mensili dello Starter.
+
 ### Robustezza
 
 - **Doppio canale di fulfillment.** Il webhook è il canale primario; la pagina

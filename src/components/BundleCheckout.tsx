@@ -2,6 +2,12 @@
 
 import { useState } from "react";
 import type { PublicProduct } from "@/lib/pricing";
+import {
+  ConsentBlock,
+  EMPTY_CONSENT,
+  consentComplete,
+  type ConsentState,
+} from "@/components/ConsentBlock";
 
 const CADENCE_NOTE: Record<PublicProduct["cadence"], string> = {
   instant: "Tutte le preghiere sono disponibili subito.",
@@ -17,19 +23,29 @@ export function BundleCheckout({
   defaultEmail?: string;
 }) {
   const [email, setEmail] = useState(defaultEmail);
+  const [consent, setConsent] = useState<ConsentState>(EMPTY_CONSENT);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function buy(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    // Il pacchetto si compra prima di scrivere la preghiera, ma il consenso
+    // serve già qui: è questo l'atto di acquisto, ed è a questo ordine che la
+    // prova del consenso resta legata.
+    if (!consentComplete(consent, "checkout")) {
+      setError("Per procedere devi spuntare tutte le dichiarazioni qui sopra.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: product.id, email: email.trim() }),
+        body: JSON.stringify({ productId: product.id, email: email.trim(), consent }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error ?? "Checkout non disponibile");
@@ -53,6 +69,8 @@ export function BundleCheckout({
           required
         />
       </label>
+
+      <ConsentBlock value={consent} onChange={setConsent} mode="checkout" />
 
       {error && (
         <p className="rounded-xl border border-ember/40 bg-ember/10 px-4 py-3 text-sm text-ink">
