@@ -15,7 +15,7 @@
 // un anno qualcuno contesta, si deve poter dire quale informativa aveva
 // davanti quel giorno. L'arrivo di AdSense ha riscritto cookie policy,
 // privacy e termini, quindi la versione si sposta.
-export const LEGAL_VERSION = "2026-08-20";
+export const LEGAL_VERSION = "2026-08-20.2";
 
 export type Holder = {
   /** Denominazione o nome e cognome se ditta individuale. */
@@ -106,7 +106,7 @@ export const SUB_PROCESSORS: SubProcessor[] = [
   },
   {
     name: "Google Ireland Ltd. (AdSense)",
-    purpose: "Pubblicità nelle pagine gratuite del sito",
+    purpose: "Pubblicità nel sito, con posizionamento automatico deciso da Google",
     data:
       "Indirizzo IP, identificativi dei cookie pubblicitari, pagina visitata, interazione con l'annuncio. " +
       "NON riceve l'intenzione, la tradizione scelta, il nome del destinatario né l'esistenza di un abbonamento",

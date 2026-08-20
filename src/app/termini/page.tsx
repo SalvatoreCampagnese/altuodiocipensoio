@@ -208,16 +208,21 @@ export default function TermsPage() {
 
       <Section h="9. Pubblicità">
         <p>
-          Alcune pagine — in fondo al sito e alla fine degli articoli dell&apos;archivio —
-          ospitano annunci serviti da <strong>Google AdSense</strong>, sempre marcati con la
-          dicitura &laquo;Pubblicità&raquo;. Sono ciò che tiene gratuito l&apos;archivio delle
-          preghiere della tradizione.
+          Il sito ospita annunci serviti da <strong>Google AdSense</strong>, riconoscibili
+          dall&apos;etichetta che Google vi appone. Sono ciò che tiene gratuito
+          l&apos;archivio delle preghiere della tradizione.
         </p>
         <p>
-          <strong>Dove non compaiono, e non compariranno:</strong> accanto a una preghiera che
-          hai acquistato, nella Preghiera del Giorno, nel Lucernario e in qualunque passaggio
-          di pagamento. Non è una cortesia: è la condizione perché il servizio resti quello che
-          dichiara di essere.
+          <strong>Dove compaiono:</strong> potenzialmente ovunque nel sito. Le posizioni le
+          sceglie Google, con la funzione &laquo;annunci automatici&raquo;, valutando pagina
+          per pagina dove un annuncio rende di più. Non le decidiamo noi, e non possiamo
+          elencartele in anticipo. Un annuncio può quindi comparire anche accanto a una
+          preghiera che hai acquistato, nel Lucernario o durante il percorso di acquisto.
+        </p>
+        <p>
+          <strong>Acquistare non toglie la pubblicità.</strong> Il prezzo che paghi è quello
+          della preghiera, non di una versione del sito senza annunci: sono due cose distinte,
+          ed è giusto che tu lo sappia prima e non dopo.
         </p>
         <p>
           Gli annunci usano cookie e richiedono il tuo consenso, che ti viene chiesto al primo
@@ -230,13 +235,15 @@ export default function TermsPage() {
           .
         </p>
         <p>
-          I contenuti degli annunci li sceglie Google, non noi, e possiamo escludere categorie
-          ma non conoscerli uno per uno in anticipo. Se ne vedi uno inappropriato per il
-          contesto,{" "}
+          Anche i contenuti li sceglie Google: possiamo escludere categorie e singoli
+          inserzionisti, ma non conoscerli uno per uno in anticipo. Se ne vedi uno
+          inappropriato per il contesto — e su un sito come questo può succedere, perché una
+          pagina sul lutto è una pagina come le altre per un sistema automatico —{" "}
           <a href={`mailto:${HOLDER.email}`} className="underline underline-offset-2 hover:text-ink">
             segnalacelo
           </a>
-          : possiamo bloccarlo. Non rispondiamo dei prodotti, dei servizi né delle informative
+          : bloccare quell&apos;inserzionista o quella categoria è una cosa che possiamo fare,
+          e la facciamo. Non rispondiamo dei prodotti, dei servizi né delle informative
           privacy degli inserzionisti: quando apri un annuncio esci dal nostro sito, e da quel
           momento vale ciò che dichiara la loro pagina.
         </p>

@@ -81,10 +81,9 @@ export default function CookiePage() {
 
       <Section h="Cookie pubblicitari — solo con il tuo consenso">
         <p>
-          In fondo alle pagine e in coda agli articoli dell&apos;archivio compaiono annunci
-          serviti da <strong>Google AdSense</strong>. Servono a tenere gratuito
-          l&apos;archivio delle preghiere della tradizione, che è e resta la parte del sito che
-          non si paga.
+          Il sito ospita annunci serviti da <strong>Google AdSense</strong>. Servono a tenere
+          gratuito l&apos;archivio delle preghiere della tradizione, che è e resta la parte del
+          sito che non si paga.
         </p>
         <p>
           Google, e i suoi partner pubblicitari, possono impostare cookie per misurare quanti
@@ -112,12 +111,15 @@ export default function CookiePage() {
           .
         </p>
         <p>
+          Le posizioni degli annunci le sceglie Google in automatico, quindi possono comparire
+          in qualunque punto del sito — anche accanto a una preghiera che hai acquistato.
+        </p>
+        <p>
           Quello che <strong>non</strong> facciamo, e non faremo: passare a Google, o a
           chiunque altro a fini pubblicitari, la tradizione religiosa che scegli, il testo
           della tua intenzione, il nome della persona a cui una preghiera è dedicata o
-          l&apos;esistenza di un tuo abbonamento. Gli annunci non sanno nulla di questo, e la
-          pubblicità non compare mai accanto a una preghiera, nel Lucernario o durante il
-          pagamento.
+          l&apos;esistenza di un tuo abbonamento. Un annuncio può stare <em>vicino</em> alla
+          tua preghiera; non sa cosa c&apos;è scritto dentro, e non lo saprà.
         </p>
       </Section>
 

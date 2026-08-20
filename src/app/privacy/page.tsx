@@ -51,8 +51,8 @@ export default function PrivacyPage() {
           interamente sulle pagine di Stripe e da noi transita solo l&apos;esito.
         </p>
         <p>
-          <strong>Che raccoglie Google, non noi:</strong> le pagine gratuite ospitano annunci
-          AdSense, e Google vi associa il tuo indirizzo IP e gli identificativi dei suoi cookie
+          <strong>Che raccoglie Google, non noi:</strong> il sito ospita annunci AdSense, e
+          Google vi associa il tuo indirizzo IP e gli identificativi dei suoi cookie
           pubblicitari. Non lo decidiamo noi e non lo vediamo noi: per quel trattamento Google
           è titolare autonomo. Il dettaglio è nella{" "}
           <Link href="/cookie" className="underline underline-offset-2 hover:text-ink">
@@ -254,8 +254,8 @@ export default function PrivacyPage() {
           tuo account, e le statistiche di traffico sono anonime e senza cookie.
         </p>
         <p>
-          La pubblicità no: gli annunci <strong>Google AdSense</strong> nelle pagine gratuite
-          usano cookie di profilazione, e per quelli il consenso serve. Lo chiede il messaggio
+          La pubblicità no: gli annunci <strong>Google AdSense</strong> usano cookie di
+          profilazione, e per quelli il consenso serve. Lo chiede il messaggio
           che compare al primo accesso dall&apos;Europa, ed è revocabile in ogni momento. Se
           rifiuti, gli annunci restano ma smettono di essere personalizzati.{" "}
           <Link href="/cookie" className="underline underline-offset-2 hover:text-ink">
@@ -265,8 +265,13 @@ export default function PrivacyPage() {
         <p>
           <strong>Nulla di ciò che riguarda la preghiera passa alla pubblicità:</strong> né la
           tradizione che scegli, né il testo della tua intenzione, né il nome di chi nomini, né
-          il fatto che tu sia abbonato. Quei dati non escono dai fornitori elencati al punto 7,
-          e la pubblicità non compare mai accanto a una preghiera.
+          il fatto che tu sia abbonato. Quei dati non escono dai fornitori elencati al punto 7.
+        </p>
+        <p>
+          Le <em>posizioni</em> degli annunci le sceglie però Google in automatico, e possono
+          quindi capitare in qualunque pagina, anche accanto a una preghiera che hai
+          acquistato. Che un annuncio stia lì vicino non significa che sappia cosa c&apos;è
+          scritto: quello che Google vede è la pagina, non la tua intenzione.
         </p>
       </Section>
 

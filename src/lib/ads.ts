@@ -18,11 +18,19 @@ import "server-only";
  *    di servire annunci in Europa. Vedi il README.
  * 2. LE INFORMATIVE VANNO AGGIORNATE. `/cookie`, `/privacy` e `/termini`
  *    dicono cosa succede adesso, non cosa succedeva prima.
- * 3. NON OVUNQUE. Gli slot restano quelli di prima: footer e fondo degli
- *    articoli dell'archivio. Mai accanto a una preghiera, mai nel Lucernario,
- *    mai in checkout. Attenzione: gli **annunci automatici** di AdSense
- *    ignorano questa regola e piazzano dove vogliono — se li accendi dal
- *    cruscotto, questa scelta editoriale salta.
+ * 3. LE POSIZIONI LE SCEGLIE GOOGLE. Il sito ha gli **annunci automatici**
+ *    accesi: lo script sta nel layout, Google decide da sé dove piazzare, e
+ *    lo fa ovunque — anche accanto a una preghiera acquistata, nel Lucernario
+ *    e in checkout. Non è un effetto collaterale da correggere: è una scelta
+ *    del titolare, presa sapendo cosa comporta, e /termini, /cookie e
+ *    /privacy la dichiarano per quello che è invece di promettere posizioni
+ *    che non possiamo garantire.
+ *
+ *    `AdSlot` qui sotto resta per la strada opposta — unità piazzate a mano,
+ *    solo dove decidiamo noi — e serve il giorno in cui si spengono gli
+ *    annunci automatici per riprendere il controllo delle posizioni. Finché
+ *    restano accesi non va compilato: darebbe entrambe le cose sulla stessa
+ *    pagina, cioè il doppio degli annunci.
  */
 
 export type AdPlacement = "footer" | "articolo";

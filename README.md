@@ -460,23 +460,26 @@ persone da un sito all'altro. Da qui discende tutto il resto:
   pretende una CMP certificata TCF: un banner fatto in casa non lo è, e Google
   limiterebbe gli annunci in Europa comunque. Ne fornisce una gratuita —
   cruscotto AdSense → **Privacy e messaggi → messaggio GDPR** — e va accesa lì.
-- **Gli slot restano due**: footer e fondo degli articoli dell'archivio. Mai
-  accanto a una preghiera, mai nella Preghiera del Giorno, mai nel Lucernario,
-  mai in checkout. **Gli annunci automatici ignorano questa regola**: se li
-  accendi dal cruscotto, Google piazza dove vuole e la scelta editoriale salta.
+- **Gli annunci automatici sono accesi**, quindi le posizioni le sceglie
+  Google: ovunque nel sito, preghiere acquistate, Lucernario e checkout
+  compresi. È una scelta deliberata del titolare, e `/termini`, `/cookie` e
+  `/privacy` la dichiarano invece di promettere posizioni non garantibili.
+  `<AdSlot>` resta per la strada opposta — unità piazzate a mano — e va
+  compilato solo dopo aver spento gli automatici, altrimenti si ottengono
+  entrambe le cose sulla stessa pagina.
 - **Nessun dato della preghiera passa alla pubblicità**: né la tradizione, né
   l'intenzione, né il nome del destinatario, né l'esistenza di un abbonamento.
 
 ```bash
-ADS_ENABLED=false                # spegne script e unità
-ADSENSE_SLOT_FOOTER=1234567890   # l'unità del footer, creata nel cruscotto
-ADSENSE_SLOT_ARTICOLO=0987654321 # quella in coda agli articoli
+ADS_ENABLED=false                # spegne script, unità e ads.txt
+ADSENSE_SLOT_FOOTER=1234567890   # solo dopo aver spento gli annunci automatici
+ADSENSE_SLOT_ARTICOLO=0987654321 # idem
 ```
 
 Finché gli `ADSENSE_SLOT_*` sono vuoti **non viene disegnato alcun riquadro**:
 un `<ins>` senza `data-ad-slot` non si riempie mai e lascerebbe in pagina un
 box «Pubblicità» perennemente vuoto. Lo script si carica comunque, che è
-quanto serve agli annunci automatici.
+quanto serve agli annunci automatici — ed è la configurazione in uso.
 
 `ADSENSE_TEST_MODE` segue `NODE_ENV`: fuori produzione le unità hanno
 `data-adtest="on"`. Le impression da localhost o dalle anteprime sono traffico

@@ -110,11 +110,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               il sostegno psicologico o le cure mediche.
             </p>
 
-            {/* Lo spazio pubblicitario sta qui e non più in alto: in fondo
-                alla pagina, dopo il contenuto e dopo i link di servizio.
-                Su un sito dove si arriva con un lutto addosso un annuncio non
-                deve mai intercettare qualcuno prima di ciò che era venuto a
-                cercare. */}
+            {/* Unità a piazzamento manuale, inattiva finché non si compilano
+                gli ADSENSE_SLOT_*. Con gli annunci automatici accesi non
+                disegna nulla: le posizioni le sceglie Google. */}
             <div className="mx-auto mt-8 max-w-md">
               <AdSlot placement="footer" />
             </div>

@@ -16,6 +16,11 @@ import { AdUnit } from "./AdUnit";
  * sul link — quello lo assolve Google con il proprio «i» — ma su un sito dove
  * si arriva con un lutto addosso è giusto che si capisca al primo sguardo
  * dove finisce il nostro contenuto e dove comincia quello di un altro.
+ *
+ * NOTA: con gli annunci automatici accesi — è il caso attuale — queste unità
+ * non servono, perché Google piazza da sé. Compilare gli `ADSENSE_SLOT_*`
+ * senza prima spegnere gli automatici darebbe entrambe le cose sulla stessa
+ * pagina.
  */
 export function AdSlot({
   placement,
