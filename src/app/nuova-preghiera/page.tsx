@@ -5,7 +5,7 @@ import { getSessionUser } from "@/lib/supabase/server";
 import { formatPrice, getEtaMinutes, getSingle } from "@/lib/pricing";
 
 export const metadata: Metadata = {
-  title: "Una nuova preghiera — AlTuoDioCiPensoIO",
+  title: "Una nuova preghiera",
   description: "Scegli la tua fede, il tipo di preghiera e scrivi la tua intenzione.",
 };
 

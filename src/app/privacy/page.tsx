@@ -4,7 +4,7 @@ import { LegalPage, Section } from "@/components/LegalPage";
 import { AUTHORITY, HOLDER, RETENTION, SUB_PROCESSORS } from "@/lib/legal";
 
 export const metadata: Metadata = {
-  title: "Informativa privacy — AlTuoDioCiPensoIO",
+  title: "Informativa privacy",
   description:
     "Come trattiamo i tuoi dati: cosa raccogliamo, su quale base giuridica, a chi lo comunichiamo, per quanto tempo e come esercitare i tuoi diritti.",
 };

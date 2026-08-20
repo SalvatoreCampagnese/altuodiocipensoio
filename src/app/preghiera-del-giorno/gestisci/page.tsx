@@ -13,7 +13,7 @@ import { getSessionUser } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Gestisci l'abbonamento — AlTuoDioCiPensoIO",
+  title: "Gestisci l'abbonamento",
   // Pagina personale raggiunta da un token: non ha niente da fare in SERP,
   // e indicizzarla significherebbe pubblicare un URL che dà accesso.
   robots: { index: false, follow: false },

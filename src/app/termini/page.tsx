@@ -4,7 +4,7 @@ import { LegalPage, Section } from "@/components/LegalPage";
 import { HOLDER } from "@/lib/legal";
 
 export const metadata: Metadata = {
-  title: "Termini e condizioni — AlTuoDioCiPensoIO",
+  title: "Termini e condizioni",
   description:
     "Cosa acquisti esattamente, come funziona il recesso per i contenuti digitali, cosa il servizio non è e non promette.",
 };

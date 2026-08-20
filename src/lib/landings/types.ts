@@ -1,9 +1,15 @@
 /**
  * Landing indicizzabili.
  *
- * Due assi separati, mai incrociati:
- *  - per tradizione   →  /preghiere/[slug]
- *  - per intenzione   →  /preghiera-per/[slug]
+ * Tre assi separati, mai incrociati:
+ *  - per tradizione   →  /preghiere/[slug]         — in quale fede si prega
+ *  - per intenzione   →  /preghiera-per/[slug]     — per COSA si prega
+ *  - per persona      →  /pregare-per/[slug]       — per CHI si prega
+ *
+ * I due `per` si somigliano nell'URL e vanno tenuti distinti nella testa:
+ * `/preghiera-per/la-guarigione` è una situazione, `/pregare-per/mia-madre`
+ * è una relazione. Chi cerca la prima ha un problema; chi cerca la seconda ha
+ * una persona, ed è un modo diverso di arrivare qui.
  *
  * Il prodotto cartesiano (15 fedi × 12 intenzioni = 210 pagine) è
  * deliberatamente escluso: sarebbero 15 varianti dello stesso testo con il
@@ -38,6 +44,44 @@ export type ReligionLanding = {
   languageNote: string;
   /** Le intenzioni più richieste in questa tradizione, con taglio suo. */
   intentions: { prayerTypeId: string; label: string; note: string }[];
+  faq: Faq[];
+};
+
+/**
+ * Una landing per persona: per chi si prega, non per cosa.
+ *
+ * È l'asse con la coda lunga più larga — «preghiera per mia madre malata»,
+ * «preghiera per un figlio lontano» — e nel 2026 anche quello con i
+ * concorrenti più deboli: su quelle query arrivano in prima pagina post di
+ * Facebook, thread di Reddit e siti stranieri tradotti a macchina.
+ *
+ * Proprio perché sono tante, il rischio è di scriverle a stampo e ricadere
+ * nella Scaled Content Abuse. I due campi che lo impediscono sono `when` e
+ * `difficulty`: se sono intercambiabili fra due pagine, quelle due pagine
+ * sono la stessa pagina e una va cancellata. `difficulty` in particolare
+ * chiede cosa rende difficile pregare per QUESTA persona — e pregare per una
+ * madre malata non somiglia a pregare per un figlio che non ti parla più.
+ */
+export type PersonLanding = {
+  slug: string;
+  /** Raggruppamento nella hub. */
+  group: "genitori" | "figli" | "coppia" | "famiglia" | "vicini" | "malattia" | "fatiche";
+  title: string;
+  description: string;
+  h1: string;
+  lede: string;
+  /** Il momento preciso in cui si cerca questa pagina. Unico per pagina. */
+  when: string;
+  /** Cosa rende difficile pregare per questa persona. Unico per pagina. */
+  difficulty: string;
+  /** Preghiere dell'archivio che valgono davvero qui: slug in ARCHIVE. */
+  archiveSlugs: string[];
+  /** Tag dell'archivio verso cui mandare per approfondire. */
+  tagSlug: string;
+  /** Tipo di preghiera con cui precompilare il form. */
+  prayerTypeId: string;
+  /** Altre pagine-persona vicine. Slug di questo stesso elenco. */
+  related: string[];
   faq: Faq[];
 };
 

@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 // Pagina di passaggio dopo il pagamento: non ha senso in SERP e porterebbe
 // visitatori su un vicolo cieco senza session_id.
 export const metadata: Metadata = {
-  title: "Grazie — AlTuoDioCiPensoIO",
+  title: "Grazie",
   robots: { index: false, follow: false },
 };
 

@@ -416,4 +416,241 @@ abbi pietà di noi.`,
     sourceNote:
       "MANCA IL TESTO. Le formule variano molto per scuola: sceglierne una, dichiarare a quale tradizione appartiene, far controllare la traduzione.",
   },
+  /* ---------------------------------------------------------------------
+   * IN ATTESA DI VERIFICA — aggiunte per copertura di ricerca
+   *
+   * Selezionate sui volumi reali di ricerca in Italia, non a intuito: da
+   * sole valgono più impression di tutto il corpus attuale (il solo Credo
+   * sta intorno alle 33.000 ricerche al mese fra le sue varianti).
+   *
+   * Sono tutte `da-rivedere` e quindi NON sono servite. Non è prudenza
+   * eccessiva: la regola in types.ts vieta di trascrivere a memoria, e queste
+   * sono trascritte a memoria. Ogni voce ha già origine, uso e tag scritti —
+   * manca solo il confronto del TESTO con la fonte indicata nel sourceNote.
+   * Verificata una voce, si cambia una parola: `da-rivedere` → `verificata`.
+   * ------------------------------------------------------------------- */
+  {
+    slug: "credo",
+    title: "Credo",
+    alsoKnownAs: ["Simbolo degli Apostoli", "Io credo in Dio"],
+    religionId: "cattolica",
+    origin:
+      "Simbolo degli Apostoli, nella forma fissata fra il II e il IX secolo. È il Credo breve, quello del Rosario e del Battesimo.",
+    text: "",
+    howToPray:
+      "Si dice all'inizio del Rosario e nella professione di fede del Battesimo. Non è una richiesta ma una dichiarazione, ed è il motivo per cui molti lo trovano difficile: si afferma qualcosa invece di chiederla. Chi fatica a dirlo tutto può fermarsi sulla riga che regge e ripartire da lì un'altra volta.",
+    tags: ["mattino", "pace"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE sul Compendio del Catechismo della Chiesa Cattolica o sul Rito del Battesimo (CEI). Attenzione: esistono due Credo e non vanno confusi — questo è il Simbolo APOSTOLICO, breve; l'altro è il Niceno-Costantinopolitano, voce `credo-niceno`.",
+  },
+  {
+    slug: "credo-niceno",
+    title: "Credo in un solo Dio",
+    alsoKnownAs: ["Simbolo niceno-costantinopolitano", "Credo lungo"],
+    religionId: "cattolica",
+    origin:
+      "Simbolo niceno-costantinopolitano, dai concili di Nicea (325) e Costantinopoli (381). È il Credo della Messa domenicale.",
+    text: "",
+    howToPray:
+      "Si recita alla Messa della domenica e delle solennità, dopo l'omelia. È il testo che le Chiese cristiane hanno in comune da milleseicento anni: la stessa formula che si dice in una parrocchia italiana la dicono, con una differenza di una riga, gli ortodossi in greco e in russo.",
+    tags: ["mattino", "pace"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE sul Messale Romano CEI in vigore. La differenza con la versione ortodossa (la questione del Filioque) va descritta, non appianata.",
+  },
+  {
+    slug: "san-michele-arcangelo",
+    title: "Preghiera a San Michele Arcangelo",
+    alsoKnownAs: ["San Michele Arcangelo, difendici nella battaglia"],
+    religionId: "cattolica",
+    origin: "Composta da papa Leone XIII nel 1886. Recitata a fine Messa fino al 1964, poi tornata nella devozione privata.",
+    text: "",
+    howToPray:
+      "È la preghiera di protezione più richiesta della devozione italiana, e si dice nei momenti in cui si ha la sensazione di dover reggere qualcosa di più grande di sé. Breve, si impara a memoria in un paio di volte.",
+    tags: ["protezione", "paura"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE sul testo di Leone XIII (1886), pubblico dominio. Circolano online varianti allungate di origine recente: usare la forma breve originale.",
+  },
+  {
+    slug: "preghiera-a-san-benedetto",
+    title: "Preghiera a San Benedetto",
+    alsoKnownAs: ["Croce di San Benedetto", "Vade retro Satana"],
+    religionId: "cattolica",
+    origin: "Legata alla medaglia-croce benedettina, la cui formula in sigle è attestata dal XVII secolo.",
+    text: "",
+    howToPray:
+      "Si accompagna alla medaglia di San Benedetto, che moltissime famiglie italiane tengono in casa o all'ingresso senza ricordarne più il testo. È una preghiera di protezione della casa più che della persona.",
+    tags: ["protezione", "paura"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE su una fonte benedettina (Abbazia di Montecassino o Subiaco). Le sigle sulla medaglia vanno riportate e sciolte con la traduzione italiana.",
+  },
+  {
+    slug: "sacro-cuore-di-gesu",
+    title: "Preghiera al Sacro Cuore di Gesù",
+    alsoKnownAs: ["Atto di offerta al Sacro Cuore", "Cuore di Gesù"],
+    religionId: "cattolica",
+    origin: "Devozione diffusa dalle apparizioni a santa Margherita Maria Alacoque (1673-1675) e dalla pratica dei primi venerdì del mese.",
+    text: "",
+    howToPray:
+      "Si dice il primo venerdì del mese e nel mese di giugno, che la devozione italiana dedica al Sacro Cuore. L'atto di offerta è la forma più comune: si offre la giornata prima che cominci.",
+    tags: ["mattino", "ringraziamento"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE su un manuale di devozione con imprimatur. Esistono più formule per il Sacro Cuore: scegliere l'atto di offerta quotidiano e dichiarare quale si è scelto.",
+  },
+  {
+    slug: "atto-di-fede-speranza-carita",
+    title: "Atti di fede, speranza e carità",
+    religionId: "cattolica",
+    origin: "Formule del catechismo tridentino, in uso nella catechesi italiana da secoli.",
+    text: "",
+    howToPray:
+      "Si dicono di seguito, uno dopo l'altro, e nella tradizione si recitano prima della confessione. Sono tre affermazioni brevi, una per ciascuna delle virtù che la teologia chiama teologali.",
+    tags: ["perdono", "mattino"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE sul Compendio del Catechismo della Chiesa Cattolica. Va indicato che si tratta di tre formule distinte e non di una sola.",
+  },
+  {
+    slug: "veni-creator",
+    title: "Vieni, o Spirito Creatore",
+    alsoKnownAs: ["Veni Creator Spiritus"],
+    religionId: "cattolica",
+    origin: "Inno del IX secolo, attribuito a Rabano Mauro. Si canta a Pentecoste e in ogni inizio solenne.",
+    text: "",
+    howToPray:
+      "È l'inno che la Chiesa canta quando comincia qualcosa di importante: un anno, un concilio, un'ordinazione, un conclave. Nella pratica personale si dice all'inizio di un impegno che si teme di non essere all'altezza di reggere.",
+    tags: ["lavoro", "mattino"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE sulla Liturgia delle Ore (CEI). ATTENZIONE AL DIRITTO D'AUTORE: la traduzione italiana della Liturgia delle Ore è coperta. Serve una versione di pubblico dominio o l'autorizzazione, altrimenti si pubblica solo il latino con una traduzione propria.",
+  },
+  {
+    slug: "preghiera-a-santa-rita",
+    title: "Preghiera a Santa Rita da Cascia",
+    alsoKnownAs: ["Santa Rita degli impossibili"],
+    religionId: "cattolica",
+    origin: "Devozione legata a santa Rita (1381-1457), invocata nella tradizione popolare per le cause disperate.",
+    text: "",
+    howToPray:
+      "Si prega per le situazioni che sembrano chiuse — un matrimonio in crisi, una malattia senza risposte, un figlio che si è perso — perché la devozione popolare le ha affidato proprio quelle. Il 22 maggio è la sua festa e il giorno delle rose benedette.",
+    tags: ["famiglia", "malattia"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE su una fonte del Monastero di Santa Rita a Cascia. Circolano molte versioni popolari di autore ignoto e data recente: preferire una formula con imprimatur e dichiararne l'origine.",
+  },
+  {
+    slug: "preghiera-a-sant-antonio",
+    title: "Preghiera a Sant'Antonio di Padova",
+    alsoKnownAs: ["Responsorio di sant'Antonio", "Si quaeris miracula"],
+    religionId: "cattolica",
+    origin: "Il Responsorio è attribuito a fra Giuliano da Spira, XIII secolo. Sant'Antonio è invocato per ciò che si è perduto.",
+    text: "",
+    howToPray:
+      "Il Responsorio si dice per le cose perdute, che nella devozione popolare comprendono anche le persone e la pace. Il martedì è il suo giorno, e la tredicina lo precede per tredici martedì.",
+    tags: ["protezione", "famiglia"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE sul testo francescano (Basilica del Santo, Padova). Distinguere il Responsorio dalle preghiere devozionali moderne che circolano con lo stesso nome.",
+  },
+  {
+    slug: "preghiera-di-san-efrem",
+    title: "Preghiera di sant'Efrem il Siro",
+    alsoKnownAs: ["Signore e Sovrano della mia vita"],
+    religionId: "ortodossa",
+    origin: "Attribuita a sant'Efrem (IV secolo). È la preghiera quaresimale per eccellenza della Chiesa ortodossa.",
+    text: "",
+    howToPray:
+      "Si dice ogni giorno della Grande Quaresima ortodossa, accompagnata da prostrazioni. Chiede di essere liberati da quattro cose e di riceverne altre quattro, e la sua forza sta nella precisione dell'elenco: non chiede di essere buoni in generale.",
+    tags: ["perdono", "pace"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE con una fonte ortodossa italiana. Far controllare la traduzione a una persona della tradizione prima di pubblicare.",
+  },
+  {
+    slug: "modeh-ani",
+    title: "Modeh Ani",
+    alsoKnownAs: ["Ti ringrazio"],
+    religionId: "ebraismo",
+    origin: "Formula del risveglio, attestata nei manuali di preghiera a partire dal XVI secolo.",
+    text: "",
+    howToPray:
+      "È la prima cosa che si dice al mattino, prima di alzarsi e prima di lavarsi le mani. Ringrazia per la restituzione dell'anima dopo il sonno, che la tradizione considera un piccolo assaggio di morte. Bastano pochi secondi.",
+    tags: ["mattino", "ringraziamento"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE su un siddur italiano. Traslitterazione e traduzione da far controllare a una persona di tradizione ebraica.",
+  },
+  {
+    slug: "ayat-al-kursi",
+    title: "Āyat al-Kursī",
+    alsoKnownAs: ["Il versetto del Trono"],
+    religionId: "islam",
+    origin: "Versetto del Corano fra i più recitati nella devozione quotidiana musulmana.",
+    text: "",
+    howToPray:
+      "Si recita dopo le preghiere obbligatorie e prima di dormire, e nella pratica comune è il testo di protezione per eccellenza. Molti lo insegnano ai bambini come prima cosa da sapere a memoria.",
+    tags: ["protezione", "sera"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE con una fonte islamica italiana. Il testo coranico non va parafrasato né citato a memoria: serve una traduzione riconosciuta e il controllo di una persona musulmana. In caso di dubbio, non pubblicare.",
+  },
+  {
+    slug: "gayatri-mantra",
+    title: "Gāyatrī Mantra",
+    religionId: "induismo",
+    origin: "Dal Rigveda. Fra i mantra più antichi ancora in uso quotidiano.",
+    text: "",
+    howToPray:
+      "Si recita all'alba, a mezzogiorno e al tramonto, rivolti al sole. È una richiesta di luce per l'intelligenza, non di beni: chiede che il pensiero sia illuminato.",
+    tags: ["mattino", "pace"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE con una fonte induista. Traslitterazione dal sanscrito e traduzione da far controllare a una persona della tradizione.",
+  },
+  {
+    slug: "tre-rifugi",
+    title: "I Tre Rifugi",
+    alsoKnownAs: ["Presa di rifugio", "Buddham saranam gacchami"],
+    religionId: "buddhismo",
+    origin: "Formula comune a tutte le scuole buddhiste, in uso dai testi in pali più antichi.",
+    text: "",
+    howToPray:
+      "Si recita tre volte all'inizio di ogni pratica, e nel buddhismo è ciò che segna l'ingresso nella tradizione. Non chiede nulla a nessuno: dichiara dove ci si appoggia.",
+    tags: ["pace", "mattino"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE con un centro buddhista italiano. Indicare la scuola di riferimento della formula riportata: la traslitterazione cambia fra pali e sanscrito.",
+  },
+  {
+    slug: "mul-mantar",
+    title: "Mūl Mantar",
+    alsoKnownAs: ["Ik Onkar"],
+    religionId: "sikhismo",
+    origin: "Apre il Guru Granth Sahib. Composto da Guru Nanak (1469-1539).",
+    text: "",
+    howToPray:
+      "È la prima cosa scritta nel libro sacro sikh e il fondamento di tutto il resto. Si recita al mattino e si impara come primo testo. Dice chi è Dio in poche righe, prima di qualunque richiesta.",
+    tags: ["mattino", "pace"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE con un gurdwara italiano. Traslitterazione dal punjabi e traduzione da far controllare a una persona sikh.",
+  },
+  {
+    slug: "navkar-mantra",
+    title: "Navkār Mantra",
+    alsoKnownAs: ["Namokar Mantra"],
+    religionId: "jainismo",
+    origin: "Il mantra fondamentale del giainismo, attestato nei testi più antichi della tradizione.",
+    text: "",
+    howToPray:
+      "Si recita al mattino e prima di ogni atto importante. Non nomina nessuna divinità e non chiede nulla: rende omaggio a chi ha percorso la via, chiunque sia stato. È la ragione per cui i giainisti lo considerano universale.",
+    tags: ["mattino", "pace"],
+    status: "da-rivedere",
+    sourceNote:
+      "DA VERIFICARE con una fonte giainista. Traslitterazione e traduzione da far controllare a una persona della tradizione.",
+  },
 ];

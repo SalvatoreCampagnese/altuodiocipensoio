@@ -10,7 +10,7 @@ import { formatPrice, getSingle } from "@/lib/pricing";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Usa una preghiera — AlTuoDioCiPensoIO",
+  title: "Usa una preghiera",
   robots: { index: false, follow: false },
 };
 

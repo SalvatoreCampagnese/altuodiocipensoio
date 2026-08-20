@@ -5,7 +5,7 @@ import { Candle } from "@/components/Candle";
 import { formatPrice, getSingle } from "@/lib/pricing";
 
 export const metadata: Metadata = {
-  title: "Come funziona — AlTuoDioCiPensoIO",
+  title: "Come funziona",
   description: "Come nasce un testo su AlTuoDioCiPensoIO: la tua intenzione, la tua tradizione, un formulario scritto su misura. A pregarlo sei tu.",
 };
 

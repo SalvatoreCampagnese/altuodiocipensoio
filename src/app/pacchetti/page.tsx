@@ -7,7 +7,7 @@ import { formatPrice, getSingle, listBundles, toPublic, type Cadence } from "@/l
 import { getSessionUser } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "I pacchetti — AlTuoDioCiPensoIO",
+  title: "I pacchetti",
   description:
     "Novena, l'anno, trigesimo: devozioni intere portate a termine giorno per giorno. Pagamento unico, nessun rinnovo automatico.",
 };

@@ -11,7 +11,7 @@ import { getSessionUser } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Il Lucernario — AlTuoDioCiPensoIO",
+  title: "Il Lucernario",
   description:
     "Una parete di candele votive. Scegli tu l'importo, accendine una e resterà accesa per te.",
 };

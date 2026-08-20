@@ -14,7 +14,7 @@ import { availableCredits, nextUnlockDate, type Bundle, type Prayer } from "@/li
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Le mie preghiere — AlTuoDioCiPensoIO",
+  title: "Le mie preghiere",
   robots: { index: false, follow: false },
 };
 

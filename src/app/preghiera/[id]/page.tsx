@@ -9,7 +9,7 @@ import { getPrayerType, getReligion } from "@/lib/religions";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "La tua preghiera — AlTuoDioCiPensoIO",
+  title: "La tua preghiera",
   robots: { index: false, follow: false },
 };
 

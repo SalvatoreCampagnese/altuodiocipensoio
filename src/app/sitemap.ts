@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
-import { INTENTION_LANDINGS, RELIGION_LANDINGS, siteUrl } from "@/lib/landings";
-import { intentionLandingPath, religionLandingPath } from "@/lib/landings";
+import { INTENTION_LANDINGS, PERSON_LANDINGS, RELIGION_LANDINGS, siteUrl } from "@/lib/landings";
+import { intentionLandingPath, personLandingPath, religionLandingPath } from "@/lib/landings";
 import { archivePath, archiveTagPath, listArchive, listTagsWithContent } from "@/lib/archive";
 
 /**
@@ -23,6 +23,8 @@ const STATIC: { path: string; priority: number; changeFrequency: MetadataRoute.S
   { path: "/preghiere-tradizionali", priority: 0.9, changeFrequency: "weekly" },
   { path: "/preghiere", priority: 0.9, changeFrequency: "weekly" },
   { path: "/preghiera-per", priority: 0.9, changeFrequency: "weekly" },
+  // La hub per persona: è l'asse con la coda lunga più larga.
+  { path: "/pregare-per", priority: 0.9, changeFrequency: "weekly" },
   { path: "/nuova-preghiera", priority: 0.8, changeFrequency: "monthly" },
   { path: "/pacchetti", priority: 0.8, changeFrequency: "monthly" },
   { path: "/pregare-con-lintelligenza-artificiale", priority: 0.7, changeFrequency: "monthly" },
@@ -55,6 +57,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
     ...INTENTION_LANDINGS.map((l) => ({
       url: `${base}${intentionLandingPath(l.slug)}`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
+    ...PERSON_LANDINGS.map((l) => ({
+      url: `${base}${personLandingPath(l.slug)}`,
       lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.8,

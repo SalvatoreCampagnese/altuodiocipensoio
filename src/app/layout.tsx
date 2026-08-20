@@ -26,7 +26,19 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AlTuoDioCiPensoIO — Le parole per pregare, quando non ti vengono",
+  /**
+   * Il nome del sito in coda a ogni titolo.
+   *
+   * È una delle poche raccomandazioni esplicite della guida di Google
+   * («includi il nome della tua attività»): in una pagina di risultati fatta
+   * di titoli quasi identici — «Preghiera per mia madre» la scrivono tutti —
+   * il nome è l'unica cosa che distingue il nostro. `default` vale per la
+   * home, che il nome ce l'ha già dentro e non deve ripeterlo.
+   */
+  title: {
+    template: "%s · AlTuoDioCiPensoIO",
+    default: "AlTuoDioCiPensoIO — Le parole per pregare, quando non ti vengono",
+  },
   description:
     "Un archivio libero di preghiere della tradizione, e un testo scritto su misura per la tua intenzione quando nessuna formula dice la tua situazione. A pregarlo sei tu.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
@@ -75,6 +87,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </Link>
                 <Link href="/preghiera-per" className="transition-colors hover:text-ink">
                   Per intenzione
+                </Link>
+                <Link href="/pregare-per" className="transition-colors hover:text-ink">
+                  Per chi pregare
                 </Link>
                 <Link href="/come-funziona" className="transition-colors hover:text-ink">
                   Come funziona

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { LegalPage, Section } from "@/components/LegalPage";
 
 export const metadata: Metadata = {
-  title: "Cookie — AlTuoDioCiPensoIO",
+  title: "Cookie",
   description:
     "Quali cookie usiamo, quali usa Google per la pubblicità, e come cambiare idea sul consenso in qualsiasi momento.",
 };

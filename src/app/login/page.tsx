@@ -3,7 +3,7 @@ import { LoginForm } from "@/components/LoginForm";
 import { Candle } from "@/components/Candle";
 
 export const metadata: Metadata = {
-  title: "Accedi — AlTuoDioCiPensoIO",
+  title: "Accedi",
   robots: { index: false, follow: false },
 };
 
