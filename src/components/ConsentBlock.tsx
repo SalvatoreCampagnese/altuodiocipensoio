@@ -29,9 +29,21 @@ export const EMPTY_CONSENT: ConsentState = {
   immediate: false,
 };
 
-/** In modalità bundle i consensi sono già stati dati all'acquisto del pacchetto. */
-export function consentComplete(c: ConsentState, mode: "checkout" | "redeem"): boolean {
+export type ConsentMode = "checkout" | "redeem" | "abbonamento";
+
+/**
+ * Quali spunte servono davvero, per ciascun momento.
+ *
+ *  checkout     — tutte: si comprano dati religiosi, dati di terzi ed esecuzione immediata
+ *  redeem       — solo i terzi: il resto è già stato prestato comprando il pacchetto
+ *  abbonamento  — tutte tranne i terzi: nell'iscrizione non si nomina nessun altro
+ *
+ * Le spunte inutili non sono innocue: una casella senza oggetto insegna a
+ * spuntare senza leggere, e svaluta quelle che contano.
+ */
+export function consentComplete(c: ConsentState, mode: ConsentMode): boolean {
   if (mode === "redeem") return c.thirdParty;
+  if (mode === "abbonamento") return c.specialData && c.terms && c.immediate;
   return c.specialData && c.terms && c.thirdParty && c.immediate;
 }
 
@@ -64,9 +76,10 @@ export function ConsentBlock({
 }: {
   value: ConsentState;
   onChange: (next: ConsentState) => void;
-  mode?: "checkout" | "redeem";
+  mode?: ConsentMode;
 }) {
   const set = (patch: Partial<ConsentState>) => onChange({ ...value, ...patch });
+  const buying = mode === "checkout" || mode === "abbonamento";
 
   return (
     <div className="space-y-5 rounded-2xl border border-gold/25 bg-paper-warm/50 p-5">
@@ -82,30 +95,61 @@ export function ConsentBlock({
           religiosa e non sostituisce riti officiati, sacramenti, accompagnamento pastorale,
           sostegno psicologico o cure mediche.
         </p>
+        {mode === "abbonamento" && (
+          <p>
+            È un <strong>abbonamento che si rinnova da solo</strong> finché non lo disdici.
+            Il link per disdire, a un clic e senza spiegazioni, è in fondo a ogni email che
+            ricevi e nella tua area di gestione.
+          </p>
+        )}
       </div>
 
       <div className="space-y-3 border-t border-gold/15 pt-4">
-        {mode === "checkout" && (
+        {buying && (
           <Check checked={value.specialData} onChange={(v) => set({ specialData: v })}>
-            Acconsento espressamente al trattamento dei dati che rivelano le mie convinzioni
-            religiose e degli eventuali dati sulla salute che inserisco, per il solo scopo di
-            comporre e consegnarmi la preghiera (art. 9 par. 2 lett. a GDPR). Posso revocare
-            il consenso in ogni momento.
+            {mode === "abbonamento" ? (
+              <>
+                Acconsento espressamente al trattamento dei dati che rivelano le mie convinzioni
+                religiose: iscrivermi a una preghiera quotidiana ne è di per sé una
+                manifestazione (art. 9 par. 2 lett. a GDPR). Posso revocare il consenso in ogni
+                momento disdicendo.
+              </>
+            ) : (
+              <>
+                Acconsento espressamente al trattamento dei dati che rivelano le mie convinzioni
+                religiose e degli eventuali dati sulla salute che inserisco, per il solo scopo di
+                comporre e consegnarmi la preghiera (art. 9 par. 2 lett. a GDPR). Posso revocare
+                il consenso in ogni momento.
+              </>
+            )}
           </Check>
         )}
 
-        <Check checked={value.thirdParty} onChange={(v) => set({ thirdParty: v })}>
-          Se inserisco dati riferiti ad altre persone — il nome di un malato, di un defunto o
-          del destinatario — dichiaro di avere titolo per farlo e di averle informate quando
-          ciò è dovuto.
-        </Check>
+        {mode !== "abbonamento" && (
+          <Check checked={value.thirdParty} onChange={(v) => set({ thirdParty: v })}>
+            Se inserisco dati riferiti ad altre persone — il nome di un malato, di un defunto o
+            del destinatario — dichiaro di avere titolo per farlo e di averle informate quando
+            ciò è dovuto.
+          </Check>
+        )}
 
-        {mode === "checkout" && (
+        {buying && (
           <>
             <Check checked={value.immediate} onChange={(v) => set({ immediate: v })}>
-              Chiedo che il servizio sia eseguito <strong>subito</strong> e prendo atto che, a
-              esecuzione completata, perderò il diritto di recesso (art. 59 comma 1 lett. o
-              del Codice del Consumo).
+              {mode === "abbonamento" ? (
+                <>
+                  Chiedo che il servizio cominci <strong>subito</strong> e prendo atto che, per
+                  ogni preghiera già consegnata, perderò il diritto di recesso (art. 59 comma 1
+                  lett. o del Codice del Consumo). Restano fermi il diritto di disdire in ogni
+                  momento e il rimborso della parte non goduta.
+                </>
+              ) : (
+                <>
+                  Chiedo che il servizio sia eseguito <strong>subito</strong> e prendo atto che, a
+                  esecuzione completata, perderò il diritto di recesso (art. 59 comma 1 lett. o
+                  del Codice del Consumo).
+                </>
+              )}
             </Check>
 
             <Check checked={value.terms} onChange={(v) => set({ terms: v })}>

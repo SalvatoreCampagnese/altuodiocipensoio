@@ -37,12 +37,28 @@ export default function PrivacyPage() {
           della persona a cui la preghiera è dedicata; la lingua e il tono.
         </p>
         <p>
+          <strong>Se ti abboni alla Preghiera del Giorno:</strong> il solo indirizzo email.
+          Non chiediamo nome, età, tradizione né alcun dato ulteriore, perché la preghiera
+          quotidiana è la stessa per tutti e non c&apos;è nulla da personalizzare.
+        </p>
+        <p>
           <strong>Che nasce dall&apos;uso:</strong> lo storico degli ordini e il loro stato, il
-          testo e l&apos;audio generati, le date di consegna.
+          testo e l&apos;audio generati, le date di consegna, e — per gli abbonati — il giorno
+          dell&apos;ultima email inviata, che serve a non spedirtene due.
         </p>
         <p>
           <strong>Che non abbiamo mai:</strong> i dati della tua carta. Il pagamento avviene
           interamente sulle pagine di Stripe e da noi transita solo l&apos;esito.
+        </p>
+        <p>
+          <strong>Che raccoglie Google, non noi:</strong> le pagine gratuite ospitano annunci
+          AdSense, e Google vi associa il tuo indirizzo IP e gli identificativi dei suoi cookie
+          pubblicitari. Non lo decidiamo noi e non lo vediamo noi: per quel trattamento Google
+          è titolare autonomo. Il dettaglio è nella{" "}
+          <Link href="/cookie" className="underline underline-offset-2 hover:text-ink">
+            pagina sui cookie
+          </Link>
+          .
         </p>
       </Section>
 
@@ -51,6 +67,12 @@ export default function PrivacyPage() {
           La tradizione religiosa che scegli rivela le tue <strong>convinzioni religiose</strong>.
           Se scrivi di una malattia — tua o di chi ami — quello è un <strong>dato sulla salute</strong>.
           Entrambi ricadono nell&apos;art. 9 GDPR, che li vieta in via generale salvo eccezioni.
+        </p>
+        <p>
+          Vale anche per il solo abbonamento: iscriversi a una preghiera quotidiana è di per
+          sé una manifestazione di convinzione religiosa, pur senza scrivere una riga. Per
+          questo la casella di consenso c&apos;è anche lì, dove non c&apos;è nessun testo da
+          comporre.
         </p>
         <p>
           L&apos;eccezione su cui ci basiamo è il tuo <strong>consenso esplicito</strong> (art. 9
@@ -228,12 +250,23 @@ export default function PrivacyPage() {
 
       <Section h="12. Cookie">
         <p>
-          Usiamo solo cookie tecnici, necessari a tenerti collegato al tuo account. Le
-          statistiche di traffico sono anonime e senza cookie, quindi non trovi un banner di
-          consenso: non ne serve uno.{" "}
+          I nostri cookie sono solo <strong>tecnici</strong>, necessari a tenerti collegato al
+          tuo account, e le statistiche di traffico sono anonime e senza cookie.
+        </p>
+        <p>
+          La pubblicità no: gli annunci <strong>Google AdSense</strong> nelle pagine gratuite
+          usano cookie di profilazione, e per quelli il consenso serve. Lo chiede il messaggio
+          che compare al primo accesso dall&apos;Europa, ed è revocabile in ogni momento. Se
+          rifiuti, gli annunci restano ma smettono di essere personalizzati.{" "}
           <Link href="/cookie" className="underline underline-offset-2 hover:text-ink">
-            Il dettaglio.
+            Il dettaglio, e come cambiare idea.
           </Link>
+        </p>
+        <p>
+          <strong>Nulla di ciò che riguarda la preghiera passa alla pubblicità:</strong> né la
+          tradizione che scegli, né il testo della tua intenzione, né il nome di chi nomini, né
+          il fatto che tu sia abbonato. Quei dati non escono dai fornitori elencati al punto 7,
+          e la pubblicità non compare mai accanto a una preghiera.
         </p>
       </Section>
 

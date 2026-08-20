@@ -49,7 +49,7 @@ create table if not exists public.orders (
   product_name               text,
   credits                    integer not null default 1,
   cadence                    text not null default 'instant'
-                               check (cadence in ('instant','daily','monthly')),
+                               check (cadence in ('instant','daily','monthly','subscription')),
   status                     public.order_status not null default 'pending',
   amount_cents               integer not null,
   currency                   text not null default 'eur',
@@ -256,3 +256,124 @@ create policy "prayers audio: own read"
         and p.user_id = auth.uid()
     )
   );
+
+-- ---------------------------------------------------------------------------
+-- daily_prayers: la Preghiera del Giorno — una per data, uguale per tutti
+--
+-- Non vive in `prayers` perché il rapporto è rovesciato: là una preghiera ha
+-- un destinatario, qui un testo ne ha molti. Scriverne una copia per abbonato
+-- ogni mattina sarebbe la stessa riga moltiplicata per la lista.
+-- ---------------------------------------------------------------------------
+create table if not exists public.daily_prayers (
+  id              uuid primary key default gen_random_uuid(),
+  -- Chiave naturale del giorno (ora di Roma). L'unicità è ciò che rende
+  -- ripetibile il cron delle 7.
+  prayer_date     date not null unique,
+
+  religion        text not null default 'cattolica',
+  language        text not null default 'it',
+  tone            text not null default 'solenne',
+  theme           text,
+  theme_label     text,
+
+  status          public.prayer_status not null default 'queued',
+  title           text,
+  body            text,
+  audio_path      text,
+  audio_duration  numeric,
+  voice_id        text,
+
+  attempts        integer not null default 0,
+  last_attempt_at timestamptz,
+  error_message   text,
+
+  generated_at    timestamptz,
+  sent_at         timestamptz,
+  sent_count      integer not null default 0,
+
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+
+create index if not exists daily_prayers_date_idx   on public.daily_prayers(prayer_date desc);
+create index if not exists daily_prayers_status_idx on public.daily_prayers(status);
+
+drop trigger if exists daily_prayers_touch_updated_at on public.daily_prayers;
+create trigger daily_prayers_touch_updated_at
+  before update on public.daily_prayers
+  for each row execute function public.touch_updated_at();
+
+-- Il testo è il bene venduto: dal client non si legge mai per intero. La
+-- pagina pubblica passa dal service role e decide lei quanto mostrarne.
+alter table public.daily_prayers enable row level security;
+
+-- ---------------------------------------------------------------------------
+-- subscriptions: chi riceve la Preghiera del Giorno
+-- ---------------------------------------------------------------------------
+do $$ begin
+  create type public.subscription_status as enum
+    ('incomplete', 'active', 'past_due', 'canceled');
+exception when duplicate_object then null; end $$;
+
+create table if not exists public.subscriptions (
+  id                     uuid primary key default gen_random_uuid(),
+  order_id               uuid references public.orders(id) on delete set null,
+  user_id                uuid references auth.users(id) on delete set null,
+  email                  text not null,
+
+  product_id             text not null default 'quotidiana',
+  status                 public.subscription_status not null default 'incomplete',
+
+  stripe_customer_id     text,
+  stripe_subscription_id text unique,
+
+  amount_cents           integer not null default 490,
+  currency               text not null default 'eur',
+  interval               text not null default 'week'
+                           check (interval in ('day','week','month')),
+
+  current_period_end     timestamptz,
+  cancel_at_period_end   boolean not null default false,
+  started_at             timestamptz not null default now(),
+  canceled_at            timestamptz,
+
+  -- Ultimo giorno consegnato: rende idempotente l'invio delle 9.
+  last_sent_on           date,
+
+  -- Token del link "gestisci / disdici" in fondo a ogni email: si disdice
+  -- senza account e con un clic.
+  manage_token           text not null default encode(gen_random_bytes(24), 'hex'),
+
+  consent_special_data   boolean not null default false,
+  consent_terms          boolean not null default false,
+  consent_immediate      boolean not null default false,
+  consent_at             timestamptz,
+  consent_version        text,
+
+  created_at             timestamptz not null default now(),
+  updated_at             timestamptz not null default now()
+);
+
+create index if not exists subscriptions_email_idx on public.subscriptions(lower(email));
+create index if not exists subscriptions_user_idx  on public.subscriptions(user_id);
+create index if not exists subscriptions_due_idx
+  on public.subscriptions(last_sent_on)
+  where status in ('active', 'past_due');
+
+-- Un'email, un abbonamento attivo: senza questo un doppio clic sul bottone
+-- diventa due addebiti e due copie della stessa preghiera.
+create unique index if not exists subscriptions_one_active_per_email
+  on public.subscriptions(lower(email))
+  where status in ('active', 'past_due');
+
+drop trigger if exists subscriptions_touch_updated_at on public.subscriptions;
+create trigger subscriptions_touch_updated_at
+  before update on public.subscriptions
+  for each row execute function public.touch_updated_at();
+
+alter table public.subscriptions enable row level security;
+
+drop policy if exists "subscriptions: own read" on public.subscriptions;
+create policy "subscriptions: own read"
+  on public.subscriptions for select
+  using (auth.uid() = user_id);

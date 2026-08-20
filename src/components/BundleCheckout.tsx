@@ -13,6 +13,8 @@ const CADENCE_NOTE: Record<PublicProduct["cadence"], string> = {
   instant: "Tutte le preghiere sono disponibili subito.",
   daily: "Una preghiera al giorno: la prima è disponibile appena paghi.",
   monthly: "Una preghiera al mese: la prima è disponibile appena paghi.",
+  // I pacchetti non si rinnovano: la voce esiste solo per completare il tipo.
+  subscription: "Una preghiera al giorno, finché resti abbonato.",
 };
 
 export function BundleCheckout({

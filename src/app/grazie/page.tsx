@@ -39,6 +39,10 @@ export default async function ThankYouPage({
       // `nuovo` è il segnale che ConversionTracker aspetta: da qui in poi
       // reindirizziamo, e senza questo parametro la conversione andrebbe persa.
       redirect(result.candleSlot ? "/lucernario?accesa=1&nuovo=lucernario" : "/lucernario?nuovo=lucernario");
+    } else if (result.subscriptionId) {
+      // L'abbonamento non produce un oggetto da mostrare: si torna alla
+      // pagina della Preghiera del Giorno, che ora la mostra per intero.
+      redirect("/preghiera-del-giorno?benvenuto=1&nuovo=quotidiana");
     } else if (result.prayerId) {
       const db = createAdminClient();
       const { data } = await db

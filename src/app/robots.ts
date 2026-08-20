@@ -20,6 +20,9 @@ export default function robots(): MetadataRoute.Robots {
           "/api/",
           "/dashboard",
           "/preghiera/", // link privati alle preghiere generate
+          // Si apre con un token che sta nelle email degli abbonati: è una
+          // pagina personale, e scansionarla non porterebbe nulla.
+          "/preghiera-del-giorno/gestisci",
           "/grazie",
           "/auth/",
         ],

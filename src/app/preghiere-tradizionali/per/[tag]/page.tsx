@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AdSlot } from "@/components/AdSlot";
+import { DailyPrayerUpsell } from "@/components/DailyPrayerUpsell";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Candle } from "@/components/Candle";
@@ -150,6 +152,10 @@ export default async function ArchiveTagPage({
             ))}
           </ul>
         </section>
+
+        <DailyPrayerUpsell variant="banner" from={`tag:${found.slug}`} className="mt-12" />
+
+        <AdSlot placement="articolo" className="mt-10" />
       </div>
     </div>
   );

@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Candle } from "@/components/Candle";
+import { AdSlot } from "@/components/AdSlot";
+import { DailyPrayerUpsell } from "@/components/DailyPrayerUpsell";
 import { JsonLd, breadcrumbLd, faqLd } from "@/components/JsonLd";
 import { LandingCta } from "@/components/LandingCta";
 import {
@@ -183,6 +185,12 @@ export default async function IntentionLandingPage({
           </LandingCta>
         </div>
 
+        <DailyPrayerUpsell
+          variant="banner"
+          from={`intenzione:${landing.slug}`}
+          className="mt-12"
+        />
+
         <section className="mt-20 border-t border-gold/15 pt-10">
           <h2 className="font-display text-2xl text-gold-deep">Altre intenzioni</h2>
           <ul className="mt-5 space-y-2">
@@ -198,6 +206,8 @@ export default async function IntentionLandingPage({
             ))}
           </ul>
         </section>
+
+        <AdSlot placement="articolo" className="mt-14" />
       </div>
     </div>
   );

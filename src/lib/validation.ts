@@ -94,3 +94,37 @@ export const checkoutSchema = z.object({
 export function firstError(error: z.ZodError): string {
   return error.issues[0]?.message ?? "Dati non validi";
 }
+
+/**
+ * Consensi per l'abbonamento alla Preghiera del Giorno.
+ *
+ * Tre spunte e non quattro: qui l'utente non inserisce dati di altre persone
+ * — non c'è un malato da nominare né un defunto — quindi la dichiarazione sui
+ * dati di terzi non ha oggetto e chiederla sarebbe una spunta finta.
+ *
+ * `specialData` resta invece necessaria, e per un motivo che non è ovvio:
+ * anche senza scrivere una riga, abbonarsi a una preghiera quotidiana di una
+ * tradizione precisa rivela una convinzione religiosa. È il dato dell'art. 9
+ * per eccellenza, e lo raccogliamo dal solo fatto dell'iscrizione.
+ */
+export const subscriptionConsentSchema = z.object(
+  {
+    specialData: mustAgree(
+      "Serve il tuo consenso esplicito: l'abbonamento rivela una convinzione religiosa"
+    ),
+    terms: mustAgree("Devi accettare i termini e l'informativa privacy"),
+    immediate: mustAgree(
+      "Serve la tua richiesta di esecuzione immediata per farti cominciare subito"
+    ),
+  },
+  { required_error: "Mancano le dichiarazioni obbligatorie per procedere" }
+);
+
+export type SubscriptionConsentInput = z.infer<typeof subscriptionConsentSchema>;
+
+export const subscribeSchema = z.object({
+  email: z.string().email("Email non valida"),
+  consent: subscriptionConsentSchema,
+  /** Da quale pagina è partita l'iscrizione, per l'attribuzione. */
+  from: z.string().trim().max(80).optional(),
+});

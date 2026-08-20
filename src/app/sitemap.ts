@@ -15,6 +15,9 @@ import { archivePath, archiveTagPath, listArchive, listTagsWithContent } from "@
 /** Pagine scritte a mano, con la priorità che gli diamo. */
 const STATIC: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "/", priority: 1, changeFrequency: "weekly" },
+  // Il prodotto di punta, e l'unica pagina commerciale il cui contenuto
+  // cambia davvero ogni giorno: la preghiera di oggi è lì dentro.
+  { path: "/preghiera-del-giorno", priority: 0.95, changeFrequency: "daily" },
   // L'archivio è l'ingresso gratuito e la sezione che porta traffico: sta
   // sopra alle landing commerciali di proposito.
   { path: "/preghiere-tradizionali", priority: 0.9, changeFrequency: "weekly" },

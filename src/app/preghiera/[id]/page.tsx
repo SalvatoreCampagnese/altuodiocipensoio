@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { DailyPrayerUpsell } from "@/components/DailyPrayerUpsell";
 import { PrayerView } from "@/components/PrayerView";
 import { loadAccessiblePrayer } from "@/lib/access";
 import { getAudioUrl } from "@/lib/generate";
@@ -49,6 +50,10 @@ export default async function PrayerPage({
             scheduledFor: prayer.scheduled_for,
           }}
         />
+
+        {/* Il momento migliore per proporre l'abbonamento è questo: la
+            preghiera è appena arrivata e ha funzionato. */}
+        <DailyPrayerUpsell variant="banner" from="preghiera-consegnata" className="mt-12" />
       </div>
     </div>
   );

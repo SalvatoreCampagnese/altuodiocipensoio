@@ -8,7 +8,7 @@ import "server-only";
  * senza toccare il codice.
  */
 
-export type Cadence = "instant" | "daily" | "monthly";
+export type Cadence = "instant" | "daily" | "monthly" | "subscription";
 export type ProductId = "single" | "novena" | "year" | "trigesimo";
 
 export type Product = {
@@ -178,6 +178,114 @@ export type PublicProduct = {
  */
 export function getEtaMinutes(): number {
   return Math.max(1, readInt("GENERATION_ETA_MINUTES", 2));
+}
+
+/* ---------------------------------------------------------------------------
+ * Preghiera del Giorno — l'abbonamento
+ *
+ * Il prodotto di punta, e l'unico ricorrente del catalogo. Il prezzo si
+ * annuncia al giorno perché è così che l'utente lo pesa ("meno di un caffè"),
+ * ma si addebita a periodo: 0,70 € incassati ogni giorno lascerebbero a Stripe
+ * circa il 38 % dell'incasso, contro il 6,5 % di un addebito settimanale.
+ *
+ * Le due cifre non devono divergere: `amountCents` si calcola da
+ * `perDayCents × daysPerPeriod`, e si può forzare solo di proposito.
+ * ------------------------------------------------------------------------- */
+
+export type SubInterval = "day" | "week" | "month";
+
+/** Quanti giorni di preghiera copre un addebito, per ciascun ritmo. */
+const DAYS_PER_INTERVAL: Record<SubInterval, number> = { day: 1, week: 7, month: 30 };
+
+export type Subscription = {
+  id: "quotidiana";
+  name: string;
+  tagline: string;
+  description: string;
+  /** Il prezzo che si annuncia: 70 = 0,70 € al giorno. */
+  perDayCents: number;
+  /** Il prezzo che si addebita davvero, una volta per periodo. */
+  amountCents: number;
+  interval: SubInterval;
+  daysPerPeriod: number;
+  /** Giorni di prova gratuita prima del primo addebito. 0 = nessuna. */
+  trialDays: number;
+  /** Ora di Roma in cui arriva l'email. Cambiarla richiede anche la 009. */
+  deliveryHour: number;
+  stripePriceId?: string;
+  enabled: boolean;
+};
+
+export function getDailySubscription(): Subscription {
+  const interval = readInterval("SUB_DAILY_INTERVAL", "week");
+  const perDayCents = Math.max(1, readInt("SUB_DAILY_PER_DAY_CENTS", 70));
+  const daysPerPeriod = DAYS_PER_INTERVAL[interval];
+
+  // Stripe rifiuta gli addebiti sotto i 50 centesimi: con un ritmo
+  // giornaliero e un prezzo basso si finirebbe sotto soglia senza accorgersene.
+  const computed = Math.max(50, perDayCents * daysPerPeriod);
+
+  return {
+    id: "quotidiana",
+    name: process.env.SUB_DAILY_NAME?.trim() || "La Preghiera del Giorno",
+    tagline: "Ogni mattina alle 9, nella tua email",
+    description:
+      "Una preghiera nuova ogni giorno, composta all'alba e la stessa per tutti quelli che la ricevono. " +
+      "Non devi scrivere niente, non devi ricordarti niente: arriva e basta.",
+    perDayCents,
+    amountCents: readInt("SUB_DAILY_CENTS", computed),
+    interval,
+    daysPerPeriod,
+    trialDays: readInt("SUB_DAILY_TRIAL_DAYS", 0),
+    deliveryHour: Math.min(23, readInt("SUB_DAILY_HOUR", 9)),
+    stripePriceId: process.env.SUB_DAILY_STRIPE_PRICE?.trim() || undefined,
+    enabled: readBool("SUB_DAILY_ENABLED", true),
+  };
+}
+
+function readInterval(key: string, fallback: SubInterval): SubInterval {
+  const raw = process.env[key]?.trim().toLowerCase();
+  return raw === "day" || raw === "week" || raw === "month" ? raw : fallback;
+}
+
+/** "a settimana" — come si dice il ritmo dell'addebito in italiano. */
+export function intervalLabel(interval: SubInterval): string {
+  return { day: "al giorno", week: "a settimana", month: "al mese" }[interval];
+}
+
+/** Versione serializzabile per i client component. */
+export type PublicSubscription = {
+  id: "quotidiana";
+  name: string;
+  tagline: string;
+  description: string;
+  /** "0,70 €" — il prezzo che si annuncia. */
+  perDay: string;
+  /** "4,90 €" — il prezzo che si addebita. */
+  price: string;
+  /** "a settimana" */
+  every: string;
+  /** "4,90 € a settimana" — già montato, per non doverlo rifare ovunque. */
+  billing: string;
+  trialDays: number;
+  deliveryHour: number;
+  enabled: boolean;
+};
+
+export function toPublicSubscription(sub: Subscription): PublicSubscription {
+  return {
+    id: sub.id,
+    name: sub.name,
+    tagline: sub.tagline,
+    description: sub.description,
+    perDay: formatPrice(sub.perDayCents),
+    price: formatPrice(sub.amountCents),
+    every: intervalLabel(sub.interval),
+    billing: `${formatPrice(sub.amountCents)} ${intervalLabel(sub.interval)}`,
+    trialDays: sub.trialDays,
+    deliveryHour: sub.deliveryHour,
+    enabled: sub.enabled,
+  };
 }
 
 /* ---------------------------------------------------------------------------

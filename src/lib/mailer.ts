@@ -219,3 +219,221 @@ function escapeHtml(text: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
+
+/* -------------------------------------------------------------------------
+ * Invio di massa
+ * ----------------------------------------------------------------------- */
+
+const RESEND_BATCH_ENDPOINT = "https://api.resend.com/emails/batch";
+
+export type BulkMessage = {
+  to: string;
+  subject: string;
+  html: string;
+  /** Link di disdetta a un clic, per gli header List-Unsubscribe. */
+  unsubscribeUrl?: string;
+};
+
+/**
+ * Spedisce fino a 100 email in una sola chiamata.
+ *
+ * Il ciclo `for (const abbonato of lista) await send(...)` qui non regge: il
+ * limite di Resend è di due richieste al secondo, quindi mille abbonati
+ * sarebbero otto minuti di sola attesa — più del budget dell'intero cron, e
+ * con l'invio delle nove che finirebbe alle nove e dieci per gli ultimi.
+ * L'endpoint batch fa cento invii in una richiesta e restituisce l'esito di
+ * ciascuno.
+ *
+ * Restituisce quante ne ha accettate: chi chiama segna come consegnati solo
+ * quelli, e i rimanenti restano da riprovare al giro dopo.
+ */
+export async function sendBulk(messages: BulkMessage[]): Promise<number> {
+  const { apiKey, from, replyTo } = config();
+  if (!apiKey || messages.length === 0) return 0;
+
+  const payload = messages.slice(0, 100).map((m) => ({
+    from,
+    to: [m.to],
+    subject: m.subject,
+    html: m.html,
+    ...(replyTo ? { reply_to: replyTo } : {}),
+    // Senza questi header un'email quotidiana finisce nello spam nel giro di
+    // poche settimane: Gmail e Yahoo pretendono la disdetta a un clic dai
+    // mittenti che spediscono in volume. `List-Unsubscribe-Post` è la parte
+    // che rende il bottone "Annulla iscrizione" nativo del client di posta.
+    ...(m.unsubscribeUrl
+      ? {
+          headers: {
+            "List-Unsubscribe": `<${m.unsubscribeUrl}>`,
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+          },
+        }
+      : {}),
+  }));
+
+  try {
+    const res = await fetch(RESEND_BATCH_ENDPOINT, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      console.error("[mailer:bulk]", res.status, (await res.text()).slice(0, 300));
+      return 0;
+    }
+
+    const body = (await res.json()) as { data?: unknown[] };
+    // Resend risponde con una riga per messaggio accettato. Se il conteggio
+    // non torna, meglio fidarsi della risposta che della richiesta: i non
+    // accettati devono restare "da spedire".
+    return Array.isArray(body.data) ? body.data.length : payload.length;
+  } catch (err) {
+    console.error("[mailer:bulk]", err instanceof Error ? err.message : err);
+    return 0;
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * Preghiera del Giorno
+ * ----------------------------------------------------------------------- */
+
+function paragraphs(body: string): string {
+  return body
+    .split(/\n{2,}/)
+    .map(
+      (p) => `<p style="margin:0 0 18px;font-size:17px;line-height:1.9;">${escapeHtml(p.trim())}</p>`
+    )
+    .join("");
+}
+
+function manageUrl(token: string): string {
+  return `${config().siteUrl}/preghiera-del-giorno/gestisci?token=${encodeURIComponent(token)}`;
+}
+
+/**
+ * Il corpo dell'email quotidiana.
+ *
+ * Costruito e non spedito: l'invio delle nove passa dal batch, che vuole i
+ * messaggi già montati. Il testo sta tutto qui dentro e non dietro un link,
+ * perché è ciò che la persona ha pagato e l'email è il prodotto — farla
+ * cliccare per leggere significa perdere metà dei lettori ogni mattina.
+ */
+export function dailyPrayerEmail(opts: {
+  to: string;
+  title: string;
+  body: string;
+  dateLabel: string;
+  themeLabel?: string | null;
+  audioUrl?: string | null;
+  manageToken: string;
+}): BulkMessage {
+  const manage = manageUrl(opts.manageToken);
+
+  return {
+    to: opts.to,
+    subject: `${opts.title} — la preghiera di oggi`,
+    unsubscribeUrl: manage,
+    html: layout(`
+      <p style="margin:0 0 6px;font-family:system-ui,sans-serif;font-size:13px;color:#8b8378;">
+        ${escapeHtml(opts.dateLabel)}${opts.themeLabel ? ` · ${escapeHtml(opts.themeLabel)}` : ""}
+      </p>
+      <h1 style="margin:0 0 8px;font-size:30px;font-weight:400;line-height:1.25;">${escapeHtml(opts.title)}</h1>
+
+      <div style="margin:28px 0;padding:24px 0;border-top:1px solid rgba(184,134,47,.2);border-bottom:1px solid rgba(184,134,47,.2);">
+        ${paragraphs(opts.body)}
+      </div>
+
+      ${
+        opts.audioUrl
+          ? `<p style="margin:0 0 20px;font-family:system-ui,sans-serif;font-size:15px;line-height:1.6;color:#6b6055;">
+               Se preferisci ascoltarla mentre la segui, la registrazione è qui.
+             </p>
+             ${button(opts.audioUrl, "Ascolta la preghiera di oggi")}`
+          : ""
+      }
+
+      <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid rgba(184,134,47,.15);font-family:system-ui,sans-serif;font-size:12px;line-height:1.7;color:#8b8378;">
+        Ricevi la Preghiera del Giorno ogni mattina.
+        <a href="${manage}" style="color:#8a6119;">Gestisci l'abbonamento o disdici</a> —
+        un clic, senza dover spiegare niente.
+      </p>
+    `),
+  };
+}
+
+/** Benvenuto: conferma l'abbonamento e, se c'è, consegna subito quella di oggi. */
+export async function sendSubscriptionWelcome(opts: {
+  to: string;
+  perDay: string;
+  billing: string;
+  hour: number;
+  manageToken: string;
+  today?: { title: string; body: string } | null;
+}): Promise<boolean> {
+  const manage = manageUrl(opts.manageToken);
+
+  return send({
+    to: opts.to,
+    subject: opts.today
+      ? `Da domani alle ${opts.hour}. Intanto, ecco quella di oggi.`
+      : `La Preghiera del Giorno comincia domani mattina`,
+    html: layout(`
+      <h1 style="margin:0 0 16px;font-size:30px;font-weight:400;line-height:1.25;">
+        Da domani, ogni mattina alle ${opts.hour}.
+      </h1>
+      <p style="margin:0 0 20px;font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;color:#6b6055;">
+        Non devi fare più niente: la preghiera del giorno arriva qui, in questa casella,
+        prima che la giornata cominci davvero. È la stessa per tutti quelli che la ricevono —
+        che è poi il senso di pregare insieme pur essendo ognuno a casa sua.
+      </p>
+      <p style="margin:0 0 24px;font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;color:#6b6055;">
+        ${escapeHtml(opts.perDay)} al giorno, addebitati ${escapeHtml(opts.billing)}.
+        Puoi disdire quando vuoi, con un clic e senza spiegazioni.
+      </p>
+
+      ${
+        opts.today
+          ? `<div style="margin:28px 0;padding:24px 0;border-top:1px solid rgba(184,134,47,.2);border-bottom:1px solid rgba(184,134,47,.2);">
+               <h2 style="margin:0 0 18px;font-size:24px;font-weight:400;">${escapeHtml(opts.today.title)}</h2>
+               ${paragraphs(opts.today.body)}
+             </div>`
+          : ""
+      }
+
+      ${button(manage, "Gestisci l'abbonamento")}
+      <p style="margin:24px 0 0;font-family:system-ui,sans-serif;font-size:12px;color:#8b8378;">
+        Tieni da parte questa email: il link qui sopra è il tuo accesso, e funziona anche
+        senza account.
+      </p>
+    `),
+  });
+}
+
+/** Disdetta registrata: cosa succede adesso, senza tentativi di trattenere. */
+export async function sendSubscriptionCanceled(opts: {
+  to: string;
+  until?: string | null;
+}): Promise<boolean> {
+  const { siteUrl } = config();
+
+  return send({
+    to: opts.to,
+    subject: "Abbonamento disdetto",
+    html: layout(`
+      <h1 style="margin:0 0 16px;font-size:30px;font-weight:400;">Fatto.</h1>
+      <p style="margin:0 0 20px;font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;color:#6b6055;">
+        L'abbonamento è disdetto e non ci saranno altri addebiti.
+        ${
+          opts.until
+            ? `Continuerai a ricevere la preghiera del giorno fino al ${escapeHtml(opts.until)}, che è il periodo già pagato.`
+            : "Da domani non riceverai più l'email del mattino."
+        }
+      </p>
+      <p style="margin:0 0 24px;font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;color:#6b6055;">
+        L'archivio delle preghiere della tradizione resta libero e aperto, come sempre.
+      </p>
+      ${button(`${siteUrl}/preghiere-tradizionali`, "Vai all'archivio")}
+    `),
+  });
+}

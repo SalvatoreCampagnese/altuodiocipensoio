@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Candle } from "@/components/Candle";
 import { SignOutButton } from "@/components/SignOutButton";
 import { AutoDeliveryToggle } from "@/components/AutoDeliveryToggle";
+import { DailyPrayerUpsell } from "@/components/DailyPrayerUpsell";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionUser } from "@/lib/supabase/server";
 import { getPrayerType, getReligion } from "@/lib/religions";
@@ -228,6 +229,10 @@ export default async function DashboardPage({
             </ul>
           )}
         </section>
+
+        {/* In fondo alla propria area e non in cima: chi apre la dashboard
+            viene a leggere ciò che ha già comprato, non a comprare altro. */}
+        <DailyPrayerUpsell variant="banner" from="dashboard" className="mt-10" />
       </div>
     </div>
   );

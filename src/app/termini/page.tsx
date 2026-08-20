@@ -23,6 +23,11 @@ export default function TermsPage() {
           una registrazione audio con voce sintetica.
         </p>
         <p>
+          Consente inoltre di abbonarsi a <strong>La Preghiera del Giorno</strong>: un testo
+          nuovo ogni mattina, uguale per tutti gli abbonati, recapitato via email. È
+          l&apos;unico prodotto ricorrente del catalogo e se ne parla al punto 3-bis.
+        </p>
+        <p>
           Il contratto si conclude quando il pagamento va a buon fine. Il venditore è il
           titolare indicato in fondo a questa pagina.
         </p>
@@ -61,12 +66,54 @@ export default function TermsPage() {
         <p>
           I prezzi sono indicati sul sito in euro e comprendono l&apos;IVA se dovuta. Il
           pagamento avviene tramite Stripe; i dati della carta non transitano dai nostri
-          sistemi. Non ci sono rinnovi automatici: ogni acquisto è singolo.
+          sistemi. <strong>Gli acquisti singoli e i pacchetti non si rinnovano:</strong> si
+          paga una volta e non resta nulla da disdire. L&apos;unica eccezione è
+          l&apos;abbonamento del punto seguente, che si rinnova per sua natura e lo dichiara
+          in ogni pagina in cui viene offerto.
         </p>
         <p>
           I pacchetti (novena, trigesimo, l&apos;anno) danno diritto a un numero determinato di
           preghiere, che si sbloccano secondo il ritmo indicato nella scheda del prodotto. I
           crediti non scadono.
+        </p>
+      </Section>
+
+      <Section h="3-bis. L'abbonamento alla Preghiera del Giorno">
+        <p>
+          <strong>Cosa ricevi.</strong> Ogni mattina, intorno alle nove ora italiana, una
+          preghiera nuova via email. È la stessa per tutte le persone abbonate: non è
+          personalizzata sulla tua situazione, e non lo diventa. Se ti serve un testo scritto
+          per un caso preciso, quello è il prodotto su misura ed è un acquisto a parte.
+        </p>
+        <p>
+          <strong>Come si paga.</strong> Il prezzo è annunciato al giorno, ma
+          l&apos;addebito è raggruppato per periodo — trovi l&apos;importo esatto e la
+          frequenza scritti sotto al bottone d&apos;iscrizione, sulla pagina del prodotto e
+          nell&apos;email di conferma. Sull&apos;estratto conto vedrai un addebito per
+          periodo, non uno al giorno. Il rinnovo è automatico finché non disdici.
+        </p>
+        <p>
+          <strong>Come si disdice.</strong> Con un clic, dal link presente in fondo a ogni
+          email ricevuta, oppure dalla pagina di gestione del tuo abbonamento. Non serve un
+          account, non serve una motivazione, non serve contattarci. La disdetta ha effetto
+          alla fine del periodo già pagato: fino a quel giorno continui a ricevere la
+          preghiera, e dopo non ci sono altri addebiti.
+        </p>
+        <p>
+          <strong>Se il pagamento non va a buon fine</strong>, Stripe riprova per alcuni
+          giorni. In quella finestra continui a ricevere la preghiera: non interrompiamo il
+          servizio al primo tentativo fallito. Se alla fine non si riesce, l&apos;abbonamento
+          si chiude da sé e nessun importo resta dovuto.
+        </p>
+        <p>
+          <strong>Se il prezzo cambia</strong>, te lo comunichiamo via email prima che il
+          nuovo prezzo si applichi, con un anticipo che ti lasci il tempo di disdire. Un
+          aumento non entra mai in vigore su un periodo già pagato.
+        </p>
+        <p>
+          <strong>Se una mattina la preghiera non arriva</strong> per un guasto nostro,
+          scrivici: rimborsiamo i giorni non serviti o li aggiungiamo alla fine
+          dell&apos;abbonamento, come preferisci.
         </p>
       </Section>
 
@@ -82,6 +129,14 @@ export default function TermsPage() {
           È esattamente ciò che spunti al momento dell&apos;acquisto: chiedi che la preghiera
           sia prodotta subito, e prendi atto che a produzione completata non potrai più
           recedere. Senza quella spunta l&apos;ordine non parte.
+        </p>
+        <p>
+          <strong>Per l&apos;abbonamento</strong> vale lo stesso principio, applicato giorno
+          per giorno: perdi il recesso sulle preghiere che ti sono già state consegnate, non
+          su quelle future. Se recedi entro quattordici giorni dall&apos;iscrizione ti
+          rimborsiamo la parte di periodo non ancora goduta, trattenendo solo i giorni
+          effettivamente serviti. Dopo i quattordici giorni resta comunque la disdetta, che
+          puoi esercitare in qualunque momento e senza motivo.
         </p>
         <p>
           <strong>Finché la preghiera non è stata prodotta</strong>, il recesso resta possibile:
@@ -151,7 +206,43 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section h="9. Reclami, legge e foro">
+      <Section h="9. Pubblicità">
+        <p>
+          Alcune pagine — in fondo al sito e alla fine degli articoli dell&apos;archivio —
+          ospitano annunci serviti da <strong>Google AdSense</strong>, sempre marcati con la
+          dicitura &laquo;Pubblicità&raquo;. Sono ciò che tiene gratuito l&apos;archivio delle
+          preghiere della tradizione.
+        </p>
+        <p>
+          <strong>Dove non compaiono, e non compariranno:</strong> accanto a una preghiera che
+          hai acquistato, nella Preghiera del Giorno, nel Lucernario e in qualunque passaggio
+          di pagamento. Non è una cortesia: è la condizione perché il servizio resti quello che
+          dichiara di essere.
+        </p>
+        <p>
+          Gli annunci usano cookie e richiedono il tuo consenso, che ti viene chiesto al primo
+          accesso e che puoi revocare quando vuoi. Se lo neghi gli annunci restano, ma non
+          personalizzati, e <strong>nulla del servizio che acquisti cambia</strong>: né il
+          prezzo, né il contenuto, né i tempi. Il dettaglio è nella{" "}
+          <Link href="/cookie" className="underline underline-offset-2 hover:text-ink">
+            pagina sui cookie
+          </Link>
+          .
+        </p>
+        <p>
+          I contenuti degli annunci li sceglie Google, non noi, e possiamo escludere categorie
+          ma non conoscerli uno per uno in anticipo. Se ne vedi uno inappropriato per il
+          contesto,{" "}
+          <a href={`mailto:${HOLDER.email}`} className="underline underline-offset-2 hover:text-ink">
+            segnalacelo
+          </a>
+          : possiamo bloccarlo. Non rispondiamo dei prodotti, dei servizi né delle informative
+          privacy degli inserzionisti: quando apri un annuncio esci dal nostro sito, e da quel
+          momento vale ciò che dichiara la loro pagina.
+        </p>
+      </Section>
+
+      <Section h="10. Reclami, legge e foro">
         <p>
           Per qualunque contestazione scrivici prima a{" "}
           <a href={`mailto:${HOLDER.email}`} className="underline underline-offset-2 hover:text-ink">

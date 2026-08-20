@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { AdSlot } from "@/components/AdSlot";
+import { DailyPrayerUpsell } from "@/components/DailyPrayerUpsell";
 import { JsonLd, breadcrumbLd, prayerLd } from "@/components/JsonLd";
 import {
   ARCHIVE_BASE,
@@ -180,6 +182,13 @@ export default async function ArchivePrayerPage({
             </Link>
           </div>
         </div>
+
+        {/* Chi ha appena letto una preghiera della tradizione è esattamente
+            chi vorrebbe averne una ogni mattina: l'offerta sta qui, dopo il
+            testo, e non sopra dove avrebbe intercettato la lettura. */}
+        <DailyPrayerUpsell variant="banner" from={`archivio:${prayer.slug}`} className="mt-10" />
+
+        <AdSlot placement="articolo" className="mt-10" />
       </div>
     </div>
   );

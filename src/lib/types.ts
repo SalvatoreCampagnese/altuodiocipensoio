@@ -128,3 +128,77 @@ export function nextUnlockDate(bundle: Bundle): Date | null {
   }
   return next;
 }
+
+/* ---------------------------------------------------------------------------
+ * Preghiera del Giorno
+ * ------------------------------------------------------------------------- */
+
+/**
+ * Il testo del giorno: uno solo, uguale per tutti gli abbonati.
+ *
+ * Volutamente non è una `Prayer`. Una preghiera ha un committente, un ordine e
+ * un destinatario; questa ha una data e una lista di lettori. Sono due cose
+ * diverse che condividono solo il fatto di essere testo.
+ */
+export type DailyPrayer = {
+  id: string;
+  /** `YYYY-MM-DD` in ora di Roma: è la chiave del giorno. */
+  prayer_date: string;
+  religion: string;
+  language: string;
+  tone: string;
+  /** Il filo conduttore scelto a rotazione, per non ripetersi. */
+  theme: string | null;
+  theme_label: string | null;
+  status: PrayerStatus;
+  title: string | null;
+  body: string | null;
+  audio_path: string | null;
+  audio_duration: number | null;
+  voice_id: string | null;
+  attempts: number;
+  last_attempt_at: string | null;
+  error_message: string | null;
+  generated_at: string | null;
+  sent_at: string | null;
+  sent_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SubscriptionStatus = "incomplete" | "active" | "past_due" | "canceled";
+
+export type DailySubscription = {
+  id: string;
+  order_id: string | null;
+  user_id: string | null;
+  email: string;
+  product_id: string;
+  status: SubscriptionStatus;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  amount_cents: number;
+  currency: string;
+  interval: "day" | "week" | "month";
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  started_at: string;
+  canceled_at: string | null;
+  /** Ultimo giorno consegnato: rende idempotente l'invio delle 9. */
+  last_sent_on: string | null;
+  /** Token del link di disdetta in fondo a ogni email. */
+  manage_token: string;
+  created_at: string;
+  updated_at: string;
+};
+
+/**
+ * L'abbonamento dà diritto alla preghiera di oggi?
+ *
+ * `past_due` sì: Stripe riprova l'addebito per giorni prima di arrendersi, e
+ * togliere il servizio al primo tentativo fallito significa punire chi ha
+ * cambiato carta. Quando Stripe si arrende passa a `canceled` da sé.
+ */
+export function subscriptionIsActive(sub: Pick<DailySubscription, "status">): boolean {
+  return sub.status === "active" || sub.status === "past_due";
+}

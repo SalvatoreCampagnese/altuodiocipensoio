@@ -11,7 +11,11 @@
  * invece di far finta che vada tutto bene.
  */
 
-export const LEGAL_VERSION = "2026-08-10";
+// Cambia quando cambiano i testi legali, e serve a una cosa concreta: se fra
+// un anno qualcuno contesta, si deve poter dire quale informativa aveva
+// davanti quel giorno. L'arrivo di AdSense ha riscritto cookie policy,
+// privacy e termini, quindi la versione si sposta.
+export const LEGAL_VERSION = "2026-08-20";
 
 export type Holder = {
   /** Denominazione o nome e cognome se ditta individuale. */
@@ -101,6 +105,16 @@ export const SUB_PROCESSORS: SubProcessor[] = [
     safeguard: "Clausole contrattuali standard",
   },
   {
+    name: "Google Ireland Ltd. (AdSense)",
+    purpose: "Pubblicità nelle pagine gratuite del sito",
+    data:
+      "Indirizzo IP, identificativi dei cookie pubblicitari, pagina visitata, interazione con l'annuncio. " +
+      "NON riceve l'intenzione, la tradizione scelta, il nome del destinatario né l'esistenza di un abbonamento",
+    country: "Irlanda / Stati Uniti",
+    safeguard:
+      "Titolare autonomo per la pubblicità, non responsabile del trattamento: la base è il consenso raccolto dal messaggio Google",
+  },
+  {
     name: "Vercel",
     purpose: "Hosting del sito e statistiche di traffico aggregate",
     data: "Log tecnici, indirizzo IP, pagine viste. Le statistiche non usano cookie né profilano",
@@ -125,6 +139,11 @@ export const RETENTION = [
     what: "Prova del consenso al trattamento dei dati particolari",
     how: "Quanto l'ordine cui si riferisce",
     why: "Obbligo di dimostrare il consenso, art. 7 par. 1 GDPR",
+  },
+  {
+    what: "Abbonamento alla Preghiera del Giorno (email, stato, scadenza)",
+    how: "Finché l'abbonamento è attivo; poi dodici mesi",
+    why: "Serve a recapitare l'email quotidiana. I dodici mesi dopo la disdetta servono a poterti dire, se contesti un addebito, cosa è successo e quando",
   },
   {
     what: "Log tecnici del server",

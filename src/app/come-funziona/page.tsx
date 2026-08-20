@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DailyPrayerUpsell } from "@/components/DailyPrayerUpsell";
 import type { Metadata } from "next";
 import { Candle } from "@/components/Candle";
 import { formatPrice, getSingle } from "@/lib/pricing";
@@ -78,6 +79,8 @@ export default function HowItWorksPage() {
           >
             Scrivi la tua intenzione — {formatPrice(single.amountCents)}
           </Link>
+
+          <DailyPrayerUpsell variant="banner" from="come-funziona" className="mt-12" />
         </div>
       </div>
     </div>

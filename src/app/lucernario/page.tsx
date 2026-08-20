@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Lucernario, type PublicSlot } from "@/components/Lucernario";
+import { DailyPrayerUpsell } from "@/components/DailyPrayerUpsell";
 import { Reveal } from "@/components/Reveal";
 import { getLucernario } from "@/lib/pricing";
 import { loadWall, remainingLabel } from "@/lib/lucernario";
@@ -100,6 +101,8 @@ export default async function LucernarioPage({
             </div>
           </section>
         </Reveal>
+
+        <DailyPrayerUpsell variant="banner" from="lucernario" className="mt-14" />
       </div>
     </div>
   );

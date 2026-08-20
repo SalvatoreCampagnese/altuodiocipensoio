@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DailyPrayerUpsell } from "@/components/DailyPrayerUpsell";
 import { PrayerForm } from "@/components/PrayerForm";
 import { getSessionUser } from "@/lib/supabase/server";
 import { formatPrice, getEtaMinutes, getSingle } from "@/lib/pricing";
@@ -44,6 +45,11 @@ export default async function NewPrayerPage({
             quando vuoi.
           </p>
         )}
+
+        {/* Sopra al modulo e non sotto: chi sta per pagare 2,90 € una
+            volta sola deve poter sapere, prima di compilare, che c'è
+            un'alternativa che costa meno e non chiede di scrivere nulla. */}
+        <DailyPrayerUpsell variant="banner" from="nuova-preghiera" className="mb-10" />
 
         <PrayerForm
           defaultEmail={email}

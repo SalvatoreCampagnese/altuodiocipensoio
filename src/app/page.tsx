@@ -1,8 +1,16 @@
 import Link from "next/link";
 import { Candle } from "@/components/Candle";
 import { Reveal } from "@/components/Reveal";
+import { DailyPrayerUpsell } from "@/components/DailyPrayerUpsell";
 import { ProductGrid } from "@/components/ProductGrid";
-import { formatPrice, getEtaMinutes, getSingle, listProducts, toPublic } from "@/lib/pricing";
+import {
+  formatPrice,
+  getDailySubscription,
+  getEtaMinutes,
+  getSingle,
+  listProducts,
+  toPublic,
+} from "@/lib/pricing";
 import { RELIGIONS } from "@/lib/religions";
 
 // I prezzi arrivano dalle env a ogni richiesta: cambiarle non richiede un rebuild.
@@ -28,6 +36,7 @@ const STEPS = [
 
 export default function HomePage() {
   const single = getSingle();
+  const daily = getDailySubscription();
   const products = listProducts().map(toPublic);
   const eta = getEtaMinutes();
 
@@ -69,16 +78,16 @@ export default function HomePage() {
             style={{ animationDelay: "1050ms" }}
           >
             <Link
-              href="/nuova-preghiera"
+              href="/preghiera-del-giorno?da=home-hero"
               className="btn-gold w-full rounded-xl px-8 py-4 text-lg font-medium text-white sm:w-auto"
             >
-              Una preghiera — {formatPrice(single.amountCents)}
+              La Preghiera del Giorno — {formatPrice(daily.perDayCents)} al giorno
             </Link>
             <Link
-              href="/pacchetti"
+              href="/nuova-preghiera"
               className="w-full rounded-xl border border-gold/35 bg-card/70 px-8 py-4 font-medium text-ink transition-all duration-300 hover:border-gold/70 hover:bg-card sm:w-auto"
             >
-              Novena, anno, trigesimo
+              Oppure una su misura — {formatPrice(single.amountCents)}
             </Link>
           </div>
 
@@ -86,10 +95,15 @@ export default function HomePage() {
             className="rise mt-6 text-sm text-ink-soft/80"
             style={{ animationDelay: "1200ms" }}
           >
-            Pagamento unico. Nessun abbonamento che si rinnova.
+            Una preghiera nuova ogni mattina alle {daily.deliveryHour}. Disdici quando vuoi,
+            con un clic.
           </p>
         </div>
       </section>
+
+      {/* L'offerta di punta, prima di ogni altra cosa: è il modo più
+          semplice di cominciare e il solo che non chiede di scrivere niente. */}
+      <DailyPrayerUpsell variant="hero" from="home" />
 
       {/* Chi prega sei tu — l'obiezione affrontata prima che venga posta */}
       <section className="border-t border-gold/12 bg-paper-warm/50 px-6 py-24">
@@ -217,8 +231,8 @@ export default function HomePage() {
               Quanto costa
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-center leading-relaxed text-ink-soft">
-              Una preghiera per un momento preciso, oppure una devozione intera portata a
-              termine giorno per giorno.
+              L&apos;abbonamento quotidiano, una preghiera per un momento preciso, oppure una
+              devozione intera portata a termine giorno per giorno.
             </p>
           </Reveal>
 
@@ -263,11 +277,18 @@ export default function HomePage() {
             in cui non ti vengono.&rdquo;
           </blockquote>
           <Link
-            href="/nuova-preghiera"
+            href="/preghiera-del-giorno?da=home-chiusura"
             className="btn-gold mt-12 inline-block rounded-xl px-9 py-4 text-lg font-medium text-white"
           >
-            Scrivi la tua intenzione — {formatPrice(single.amountCents)}
+            Comincia domani mattina — {formatPrice(daily.perDayCents)} al giorno
           </Link>
+          <p className="mt-5 text-sm text-ink-soft/80">
+            Oppure{" "}
+            <Link href="/nuova-preghiera" className="underline underline-offset-4 hover:text-ink">
+              scrivi la tua intenzione
+            </Link>{" "}
+            per una preghiera su misura, a {formatPrice(single.amountCents)}.
+          </p>
         </Reveal>
       </section>
     </>

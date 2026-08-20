@@ -5,12 +5,16 @@ l'utente:** il servizio scrive formulari, non prega al posto di nessuno — e
 questa distinzione è il prodotto, non una nota legale. Se una modifica al copy
 la annacqua, è una regressione.
 
-Due strade, in quest'ordine:
+Tre strade, in quest'ordine:
 
 1. **L'archivio** (`/preghiere-tradizionali`) — le preghiere che la tradizione
    ha già scritto, ordinate per situazione. Gratuito, senza registrazione. È
    l'ingresso del funnel e la sezione che porta traffico organico.
-2. **Il testo su misura** (`/nuova-preghiera`) — quando nessuna formula
+2. **La Preghiera del Giorno** (`/preghiera-del-giorno`) — l'abbonamento, e
+   **l'offerta di punta**: una preghiera nuova ogni mattina alle 9 via email,
+   la stessa per tutti gli abbonati. 0,70 € al giorno. È il prodotto con
+   l'attrito più basso — non c'è niente da scrivere — e l'unico ricorrente.
+3. **Il testo su misura** (`/nuova-preghiera`) — quando nessuna formula
    esistente dice quella situazione. OpenAI compone rispettando le formule
    della tradizione scelta, ElevenLabs registra una voce che accompagna la
    lettura, Stripe raccoglie l'offerta.
@@ -26,6 +30,7 @@ Supabase (auth, Postgres, Storage) · Stripe · OpenAI · ElevenLabs · Resend
 
 | Prodotto | Preghiere | Ritmo | Offerta |
 |---|---|---|---|
+| **La Preghiera del Giorno** | una al giorno, sempre | ogni mattina alle 9 | **0,70 €/giorno** (4,90 € a settimana) |
 | Una preghiera | 1 | subito | 2,90 € |
 | Novena | 9 | una al giorno | 14,90 € |
 | L'anno | 12 | una al mese | 19,90 € |
@@ -38,10 +43,20 @@ d'ambiente (sezione LISTINO in `.env.example`). Le pagine che mostrano prezzi
 sono `force-dynamic`: cambi la variabile, riavvii, ed è fatta — nessun rebuild.
 
 ```bash
+SUB_DAILY_PER_DAY_CENTS=90      # porta l'abbonamento a 0,90 €/giorno (6,30 €/sett.)
+SUB_DAILY_INTERVAL=month        # passa all'addebito mensile (30 × il prezzo al giorno)
 PRODUCT_SINGLE_CENTS=390        # alza la singola a 3,90 €
 PRODUCT_TRIGESIMO_ENABLED=false # toglie il trigesimo dal sito
 LUCERNARIO_SLOTS=100            # raddoppia le candele
 ```
+
+**Perché il prezzo si annuncia al giorno ma si addebita a settimana.** Stripe
+prende 0,25 € fissi più l'1,5 % per transazione: incassare 0,70 € ogni giorno
+lascerebbe al processore circa il **38 %** dell'incasso, contro il **6,5 %** di
+un addebito settimanale. Raggruppare sette giorni è ciò che permette di tenere
+il prezzo a settanta centesimi invece di alzarlo. Le due cifre non divergono
+mai da sole: `amountCents` si calcola da `perDayCents × giorni del periodo`, e
+`SUB_DAILY_CENTS` esiste solo per forzarlo di proposito.
 
 ---
 
@@ -96,6 +111,10 @@ L'app parte anche senza chiavi: le pagine si vedono, il checkout risponde
 1. Crea un progetto su [supabase.com](https://supabase.com).
 2. **SQL Editor** → incolla ed esegui `supabase/schema.sql`. Crea tabelle,
    trigger, policy RLS e il bucket privato `prayers`.
+   Su un database **già in uso**, `schema.sql` non basta: esegui in ordine le
+   migrazioni in `supabase/migrations/` che non hai ancora applicato. Per la
+   Preghiera del Giorno servono la **008** (tabelle `daily_prayers` e
+   `subscriptions`) e la **009** (i due job delle 7 e delle 9).
 3. **Project Settings → API** → copia in `.env.local`:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -123,7 +142,23 @@ L'app parte anche senza chiavi: le pagine si vedono, il checkout risponde
    `https://tuodominio.it/api/webhooks/stripe`, eventi
    `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
    `checkout.session.expired`, `checkout.session.async_payment_failed`,
-   `charge.refunded`.
+   `charge.refunded`, e — per l'abbonamento —
+   `customer.subscription.updated`, `customer.subscription.deleted`,
+   `invoice.paid`, `invoice.payment_failed`.
+
+   **Senza i quattro eventi di abbonamento** le iscrizioni si aprono ma non si
+   aggiornano mai: un abbonamento disdetto o non pagato continuerebbe a
+   ricevere la preghiera, perché è quella colonna a decidere chi il cron delle
+   9 serve.
+
+4. **Abbonamento.** Se usi un Price ID in `SUB_DAILY_STRIPE_PRICE` dev'essere
+   un prezzo **ricorrente** (`recurring`), non one-time: un prezzo singolo fa
+   fallire la sessione `mode=subscription`. Lasciandolo vuoto, il prezzo
+   ricorrente viene costruito al volo dai valori `SUB_DAILY_*`.
+5. **Settings → Billing → Customer portal** → attivalo. È ciò che alimenta
+   `/api/subscription/portal`, cioè l'unico posto dove un abbonato con la carta
+   scaduta può aggiornarla. Finché è spento, quel bottone risponde con
+   l'errore di Stripe — e all'abbonato resta come sola strada la disdetta.
 
 ### 3. Email — Resend
 
@@ -156,6 +191,70 @@ femminile con `ELEVENLABS_VOICE_ID_ARABIC` e `ELEVENLABS_VOICE_ID_FEMALE`.
 ---
 
 ## Come funziona dentro
+
+### La Preghiera del Giorno (l'abbonamento)
+
+Il prodotto di punta. Una preghiera sola al giorno, uguale per tutti, che
+arriva via email senza che l'abbonato debba fare nulla.
+
+```
+/preghiera-del-giorno  →  POST /api/subscribe
+                          crea orders(cadence=subscription, prova del consenso)
+                          → Stripe Checkout in mode=subscription
+                             ↓ pagamento
+     webhook checkout.session.completed  →  ensureSubscription()
+                          crea subscriptions(status, manage_token)
+                          + email di benvenuto con la preghiera di oggi
+                             ↓
+     ogni mattina, da pg_cron:
+       07:00 Roma  →  POST /api/cron/preghiera-del-giorno?step=genera
+                      composeDailyPrayer(): OpenAI → ElevenLabs → Storage
+       09:00 Roma  →  POST /api/cron/preghiera-del-giorno?step=invia
+                      deliverDailyPrayer(): lotto di 100 email via Resend
+```
+
+**Perché due tabelle nuove e non `prayers`.** In `prayers` una riga è una
+preghiera con un committente, un ordine e un destinatario. Qui il rapporto è
+rovesciato: un testo, molti lettori. Scrivere una copia identica per abbonato
+ogni mattina sarebbe la stessa riga moltiplicata per la lista.
+
+- `daily_prayers` — una riga per data, `prayer_date` **unica**. È quel vincolo
+  a rendere ripetibile il giro delle 7: se scatta due volte non nascono due
+  preghiere.
+- `subscriptions` — chi riceve, fin quando, e il giorno dell'ultima consegna.
+  Un indice unico parziale su `lower(email)` impedisce due abbonamenti attivi
+  sullo stesso indirizzo, cioè due addebiti e due email identiche al giorno.
+
+**Perché due ore fra le 7 e le 9.** Se testo e voce si componessero alle nove
+meno un minuto, una brutta giornata di OpenAI significherebbe nessuna email
+quel giorno. Con il margine c'è il tempo per il tentativo delle 8, e nessuno
+se ne accorge.
+
+**Il tema del giorno.** A un modello a cui si chiede «una preghiera per oggi»
+esce trecentosessantacinque volte la stessa preghiera sulla luce del mattino.
+`THEMES` in `src/lib/dailyPrayer.ts` impone un argomento diverso ogni giorno.
+Sono **trentuno**, che è primo: con trenta il ciclo cadrebbe sempre di lunedì
+e ogni lunedì avrebbe lo stesso tema.
+
+**Prima si segna, poi si spedisce.** In `deliverDailyPrayer()` la marcatura
+`last_sent_on` precede l'invio. Sembra sbagliato, ed è deliberato: fra ricevere
+due volte la stessa preghiera e non riceverla per un giorno, il doppione è
+molto peggio — è così che un mittente quotidiano si prende una segnalazione di
+spam, e quella danneggia la consegna a tutti gli altri. Se l'invio fallisce del
+tutto, la marcatura si annulla e il giro dopo riprova.
+
+**La disdetta è a un clic**, dal link in fondo a ogni email (`manage_token`,
+nessun account richiesto) e con gli header `List-Unsubscribe` /
+`List-Unsubscribe-Post` che Gmail e Yahoo pretendono da chi spedisce in volume.
+Rendere difficile andarsene non trattiene nessuno: converte la disdetta in una
+segnalazione di spam.
+
+**Il paywall.** Su `/preghiera-del-giorno` chi non è abbonato vede titolo, tema
+e primo paragrafo; il resto è sfocato ma visibile — un muro che non mostra cosa
+nasconde non convince nessuno. Gli abbonati entrano dal token dell'email o da
+una sessione il cui indirizzo risulta abbonato.
+
+---
 
 ### Preghiera singola (2,90 €)
 
@@ -342,12 +441,56 @@ da solo consuma ~45.000 caratteri contro i 30.000 mensili dello Starter.
 
 ---
 
+### Pubblicità (Google AdSense)
+
+`src/lib/ads.ts` tiene la configurazione, `<AdSlot placement="…" />` disegna
+l'unità, lo script sta nel `layout.tsx`. Editore: `ca-pub-5107049257138780`.
+
+**Il cambio da link sponsorizzato ad AdSense non è di fornitore, è di natura.**
+Un link di affiliazione non tocca il browser di chi legge; AdSense carica uno
+script che imposta cookie, costruisce un profilo pubblicitario e segue le
+persone da un sito all'altro. Da qui discende tutto il resto:
+
+- **`/cookie` è stata riscritta da cima a fondo.** Diceva «non c'è il banner
+  perché non ci sono cookie di profilazione» — vero fino a ieri, falso da
+  adesso. Una cookie policy falsa è peggio di una assente: è una
+  dichiarazione, non un'omissione. Anche `/privacy` (punti 2 e 12) e
+  `/termini` (punto 9) sono aggiornate, e `LEGAL_VERSION` è salita.
+- **Il consenso NON si raccoglie dal codice.** Per il traffico SEE/UK Google
+  pretende una CMP certificata TCF: un banner fatto in casa non lo è, e Google
+  limiterebbe gli annunci in Europa comunque. Ne fornisce una gratuita —
+  cruscotto AdSense → **Privacy e messaggi → messaggio GDPR** — e va accesa lì.
+- **Gli slot restano due**: footer e fondo degli articoli dell'archivio. Mai
+  accanto a una preghiera, mai nella Preghiera del Giorno, mai nel Lucernario,
+  mai in checkout. **Gli annunci automatici ignorano questa regola**: se li
+  accendi dal cruscotto, Google piazza dove vuole e la scelta editoriale salta.
+- **Nessun dato della preghiera passa alla pubblicità**: né la tradizione, né
+  l'intenzione, né il nome del destinatario, né l'esistenza di un abbonamento.
+
+```bash
+ADS_ENABLED=false                # spegne script e unità
+ADSENSE_SLOT_FOOTER=1234567890   # l'unità del footer, creata nel cruscotto
+ADSENSE_SLOT_ARTICOLO=0987654321 # quella in coda agli articoli
+```
+
+Finché gli `ADSENSE_SLOT_*` sono vuoti **non viene disegnato alcun riquadro**:
+un `<ins>` senza `data-ad-slot` non si riempie mai e lascerebbe in pagina un
+box «Pubblicità» perennemente vuoto. Lo script si carica comunque, che è
+quanto serve agli annunci automatici.
+
+`ADSENSE_TEST_MODE` segue `NODE_ENV`: fuori produzione le unità hanno
+`data-adtest="on"`. Le impression da localhost o dalle anteprime sono traffico
+non valido, ed è il motivo più comune di sospensione di un account.
+
+
 ## Struttura
 
 ```
 src/
   app/
     page.tsx                     landing
+    preghiera-del-giorno/        abbonamento: preghiera di oggi + paywall
+    preghiera-del-giorno/gestisci/  area abbonato (token, senza account)
     nuova-preghiera/             form + offerta singola
     pacchetti/                   novena, anno, trigesimo
     lucernario/                  parete di 50 candele a offerta libera
@@ -358,7 +501,11 @@ src/
     login/, auth/callback/       magic link Supabase
     api/
       checkout/                  crea ordine + sessione Stripe
-      webhooks/stripe/           fulfillment
+      subscribe/                 iscrizione (Stripe mode=subscription)
+      subscription/cancel/       disdetta a fine periodo, con un clic
+      subscription/portal/       portale Stripe: carta e ricevute
+      cron/preghiera-del-giorno/ ?step=genera (7:00) · ?step=invia (9:00)
+      webhooks/stripe/           fulfillment + ciclo di vita abbonamento
       prayers/[id]/              stato + signed URL (polling)
       prayers/[id]/generate/     pipeline di generazione
       bundle/redeem/             consuma un credito
@@ -367,6 +514,9 @@ src/
     preghiera-per/               hub + 12 landing per intenzione (SEO)
     sitemap.ts, robots.ts        indicizzazione
   components/                    form, player, header, candela
+    DailyPrayerUpsell.tsx        l'offerta di punta, in quattro formati
+    SubscribeForm.tsx            iscrizione: un campo e tre spunte
+    AdSlot.tsx / AdUnit.tsx      unità AdSense, etichettata «Pubblicità»
   lib/
     landings/                    contenuti delle landing indicizzabili
     track.ts                     attribuzione conversione → landing
@@ -376,7 +526,9 @@ src/
     generate.ts                  pipeline testo → voce → storage → DB
     fulfillment.ts               da pagamento a bene consegnato
     types.ts                     tipi + logica dei crediti a cadenza
-    pricing.ts                   listino e Lucernario, letti dalle env
+    pricing.ts                   listino, abbonamento e Lucernario, dalle env
+    dailyPrayer.ts               composizione delle 7 e consegna delle 9
+    ads.ts                       configurazione AdSense (editore, slot)
     lucernario.ts                stato della parete e accensione candele
     scheduler.ts                 accodamento e svuotamento della coda (cron)
     mailer.ts                    consegna via email (Resend)
@@ -385,6 +537,9 @@ supabase/schema.sql              tabelle, RLS, bucket
 supabase/migrations/             002 prodotti · 003 lucernario · 004 allerte
                                  005 consegna automatica
                                  006 pianificazione del cron (pg_cron)
+                                 007 prova del consenso
+                                 008 Preghiera del Giorno (tabelle)
+                                 009 i job delle 7 e delle 9 (pg_cron)
 ```
 
 ---
@@ -414,6 +569,25 @@ Vercel: importa il repo, incolla le variabili d'ambiente, imposta
 `NEXT_PUBLIC_SITE_URL` sul dominio reale. Poi registra il webhook Stripe di
 produzione e aggiungi il redirect URL in Supabase.
 
+Per la Preghiera del Giorno, in più:
+
+1. applica le migrazioni **008** e **009** al database;
+2. controlla che l'URL nella 009 punti al dominio vero (è scritto per esteso
+   nel corpo dei job, non letto da una variabile);
+3. verifica i due job — `select * from cron.job;` deve mostrare
+   `preghiera-del-giorno-genera` e `preghiera-del-giorno-invia`;
+4. attiva il **Customer portal** di Stripe e aggiungi i quattro eventi di
+   abbonamento al webhook.
+
+Il primo giro si può forzare senza aspettare le 7:
+
+```bash
+curl -X POST -H "Authorization: Bearer $CRON_SECRET" \
+  'https://tuodominio.it/api/cron/preghiera-del-giorno?step=genera'
+```
+
+`?giorno=2026-08-19` recupera un giorno saltato.
+
 La generazione può durare 20–40 secondi: le route hanno `maxDuration = 120`,
 che su Vercel richiede un piano Pro. In alternativa il polling del client
 recupera comunque il risultato.
@@ -426,6 +600,15 @@ recupera comunque il risultato.
   e token OpenAI (~0,29 € in tutto), più 1,5% + 0,25 € di Stripe per
   transazione. È la commissione fissa di Stripe a rendere svantaggiosi gli
   importi bassi, non l'IA.
+- **L'abbonamento ribalta quel conto.** La preghiera del giorno si compone una
+  volta sola e la leggono tutti: il costo di OpenAI ed ElevenLabs è ~0,29 € al
+  giorno *in totale*, non per abbonato, e non cresce con la lista. Il costo
+  marginale di un abbonato in più è la sola email. È il motivo per cui è il
+  prodotto da spingere, prima ancora del prezzo d'ingresso più basso.
+- L'invio quotidiano usa il **lotto** di Resend (100 email per chiamata): il
+  limite di due richieste al secondo renderebbe un ciclo email-per-email più
+  lento del budget del cron. Oltre i 100 abbonati servono più passaggi, ed è
+  per questo che il job delle 9 gira ogni 20 minuti fino alle 10.
 - Il Lucernario è a **importo libero**, non una donazione: chi paga riceve un
   bene digitale, quindi resta una cessione a tutti gli effetti. Il linguaggio
   del sito è commerciale apposta.

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { BundleCheckout } from "@/components/BundleCheckout";
+import { DailyPrayerUpsell } from "@/components/DailyPrayerUpsell";
 import { Candle } from "@/components/Candle";
 import { Reveal } from "@/components/Reveal";
-import { formatPrice, getSingle, listBundles, toPublic } from "@/lib/pricing";
+import { formatPrice, getSingle, listBundles, toPublic, type Cadence } from "@/lib/pricing";
 import { getSessionUser } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -11,16 +12,19 @@ export const metadata: Metadata = {
     "Novena, l'anno, trigesimo: devozioni intere portate a termine giorno per giorno. Pagamento unico, nessun rinnovo automatico.",
 };
 
-const CADENCE_LABEL = {
+const CADENCE_LABEL: Record<Cadence, string> = {
   instant: "tutte subito",
   daily: "una al giorno",
   monthly: "una al mese",
-} as const;
+  // Nessun pacchetto ha questa cadenza — è dell'abbonamento, che si compra
+  // altrove — ma la mappa dev'essere completa perché il tipo lo esige.
+  subscription: "ogni giorno, finché resti abbonato",
+};
 
 const FAQ = [
   {
     q: "Sono abbonamenti che si rinnovano? ",
-    a: "No. Paghi una volta sola e le preghiere sono tue. Non memorizziamo nulla per addebiti futuri e non c'è niente da disdire.",
+    a: "No, i pacchetti no. Paghi una volta sola e le preghiere sono tue: niente addebiti futuri e niente da disdire. L'unico prodotto che si rinnova è La Preghiera del Giorno, ed è dichiarato come tale in ogni sua pagina.",
   },
   {
     q: "Perché una al giorno e non tutte insieme? ",
@@ -80,6 +84,10 @@ export default async function PacchettiPage({
             Pagamento annullato. Nessun addebito è stato effettuato.
           </p>
         )}
+
+        {/* Chi guarda i pacchetti sta già cercando una devozione continuata:
+            è l'offerta quotidiana con un altro nome, e costa meno. */}
+        <DailyPrayerUpsell variant="banner" from="pacchetti" className="mt-10" />
 
         <div className="mt-16 space-y-8">
           {bundles.map((p, i) => (

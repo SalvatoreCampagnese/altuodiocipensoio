@@ -3,10 +3,13 @@ import { Suspense } from "react";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import Link from "next/link";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import "./globals.css";
+import { AdSlot } from "@/components/AdSlot";
 import { ConversionTracker } from "@/components/ConversionTracker";
 import { DivineLight } from "@/components/DivineLight";
 import { SiteHeader } from "@/components/SiteHeader";
+import { getAdsense } from "@/lib/ads";
 import { HOLDER, legalDataMissing } from "@/lib/legal";
 
 const serif = Cormorant_Garamond({
@@ -36,6 +39,8 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const adsense = getAdsense();
+
   return (
     <html lang="it" className={`${serif.variable} ${inter.variable}`}>
       <body className="min-h-screen antialiased">
@@ -56,6 +61,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <nav className="flex flex-wrap gap-5">
                 {/* Le due hub stanno nel footer di ogni pagina: è così che il
                     crawler raggiunge le 27 landing senza dipendere dalla sitemap. */}
+                <Link
+                  href="/preghiera-del-giorno?da=footer"
+                  className="font-medium text-gold-deep transition-colors hover:text-ink"
+                >
+                  Preghiera del giorno
+                </Link>
                 <Link href="/preghiere-tradizionali" className="transition-colors hover:text-ink">
                   Archivio
                 </Link>
@@ -99,6 +110,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               il sostegno psicologico o le cure mediche.
             </p>
 
+            {/* Lo spazio pubblicitario sta qui e non più in alto: in fondo
+                alla pagina, dopo il contenuto e dopo i link di servizio.
+                Su un sito dove si arriva con un lutto addosso un annuncio non
+                deve mai intercettare qualcuno prima di ciò che era venuto a
+                cercare. */}
+            <div className="mx-auto mt-8 max-w-md">
+              <AdSlot placement="footer" />
+            </div>
+
             {/* Obblighi informativi per il commercio elettronico: identità,
                 sede e contatti devono essere accessibili da ogni pagina. */}
             <p className="mx-auto mt-4 max-w-5xl text-xs leading-relaxed opacity-60">
@@ -121,8 +141,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </footer>
         </div>
 
-        {/* Senza cookie: non serve un banner di consenso. */}
+        {/* Vercel Analytics resta senza cookie e senza profilazione. */}
         <Analytics />
+
+        {/*
+          AdSense. Attenzione a cosa comporta, perché non è un dettaglio
+          tecnico: questo script imposta cookie di profilazione, e da quando
+          c'è il sito NON può più dichiarare di non averne — le informative in
+          /cookie, /privacy e /termini sono state riscritte di conseguenza.
+
+          Il consenso per il traffico SEE/UK NON si raccoglie da qui. Google
+          pretende una CMP certificata TCF e ne fornisce una gratuita: si
+          accende dal cruscotto AdSense in «Privacy e messaggi → messaggio
+          GDPR», che è anche il motivo per cui qui non c'è un banner fatto in
+          casa — non sarebbe certificato, e Google limiterebbe gli annunci in
+          Europa comunque.
+
+          `afterInteractive`: lo script parte dopo che la pagina è
+          utilizzabile. Metterlo prima significherebbe far aspettare un
+          annuncio a chi è venuto a cercare una preghiera.
+        */}
+        {adsense.enabled && (
+          <Script
+            id="adsbygoogle-init"
+            async
+            strategy="afterInteractive"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsense.client}`}
+            crossOrigin="anonymous"
+          />
+        )}
 
         {/* Legge `?nuovo=` dall'URL, quindi va in Suspense: senza, l'intero
             layout perderebbe il rendering statico. Non disegna nulla. */}
