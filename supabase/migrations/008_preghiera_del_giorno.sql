@@ -118,7 +118,20 @@ create table if not exists public.subscriptions (
   -- Token del link "gestisci / disdici" in fondo a ogni email. Un abbonato
   -- deve poter disdire senza avere un account: la disdetta a un clic non è
   -- una cortesia, è ciò che tiene le email fuori dallo spam.
-  manage_token           text not null default encode(gen_random_bytes(24), 'hex'),
+  --
+  -- Il token NON usa `gen_random_bytes()`: quella funzione è di pgcrypto, che su
+  -- Supabase vive nello schema `extensions`. L'SQL Editor ce l'ha nel
+  -- search_path e il runner delle migrazioni no, quindi lo stesso file
+  -- funzionava a mano e falliva con `supabase db push`. Qualificarla come
+  -- `extensions.gen_random_bytes` sposterebbe solo il problema: su un progetto
+  -- dove pgcrypto sta in `public` fallirebbe l'opposto.
+  -- `gen_random_uuid()` è invece nel core di Postgres dalla 13, non richiede
+  -- estensioni, ed è già la sorgente casuale di ogni chiave primaria di questo
+  -- schema. Due UUID concatenati e ripuliti dai trattini danno 64 caratteri
+  -- esadecimali, cioè 244 bit di entropia contro i 192 di 24 byte: più di
+  -- prima, e senza dipendenze.
+  manage_token           text not null
+                           default replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''),
 
   -- Prova del consenso, come per gli ordini (art. 7 par. 1 GDPR).
   consent_special_data   boolean not null default false,

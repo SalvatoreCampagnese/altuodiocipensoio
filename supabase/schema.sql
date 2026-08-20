@@ -143,8 +143,13 @@ create table if not exists public.prayers (
   voice_id        text,
   error_message   text,
 
-  -- token per accesso ospite (senza login) alla pagina della preghiera
-  access_token    text not null default encode(gen_random_bytes(24), 'hex'),
+  -- token per accesso ospite (senza login) alla pagina della preghiera.
+  -- Stessa ragione del `manage_token` degli abbonamenti: niente pgcrypto,
+  -- così questo file passa anche dal runner delle migrazioni e non solo
+  -- dall'SQL Editor. Sui database già creati non cambia nulla — il default
+  -- vale per le righe nuove, e i token esistenti restano validi.
+  access_token    text not null
+                    default replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''),
 
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now(),
@@ -342,7 +347,20 @@ create table if not exists public.subscriptions (
 
   -- Token del link "gestisci / disdici" in fondo a ogni email: si disdice
   -- senza account e con un clic.
-  manage_token           text not null default encode(gen_random_bytes(24), 'hex'),
+  --
+  -- Il token NON usa `gen_random_bytes()`: quella funzione è di pgcrypto, che su
+  -- Supabase vive nello schema `extensions`. L'SQL Editor ce l'ha nel
+  -- search_path e il runner delle migrazioni no, quindi lo stesso file
+  -- funzionava a mano e falliva con `supabase db push`. Qualificarla come
+  -- `extensions.gen_random_bytes` sposterebbe solo il problema: su un progetto
+  -- dove pgcrypto sta in `public` fallirebbe l'opposto.
+  -- `gen_random_uuid()` è invece nel core di Postgres dalla 13, non richiede
+  -- estensioni, ed è già la sorgente casuale di ogni chiave primaria di questo
+  -- schema. Due UUID concatenati e ripuliti dai trattini danno 64 caratteri
+  -- esadecimali, cioè 244 bit di entropia contro i 192 di 24 byte: più di
+  -- prima, e senza dipendenze.
+  manage_token           text not null
+                           default replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''),
 
   consent_special_data   boolean not null default false,
   consent_terms          boolean not null default false,
