@@ -482,6 +482,18 @@ quanto serve agli annunci automatici.
 `data-adtest="on"`. Le impression da localhost o dalle anteprime sono traffico
 non valido, ed è il motivo più comune di sospensione di un account.
 
+**`/ads.txt`** è generato da `src/app/ads.txt/route.ts`, non è un file statico:
+l'identificativo dell'editore vive già in `ADSENSE_CLIENT`, e una seconda copia
+in `public/` divergerebbe alla prima modifica — con un guasto silenzioso,
+perché autorizzare l'editore sbagliato non dà errori, solo annunci che smettono
+di rendere. La route toglie da sola il prefisso `ca-`, che lo script vuole e il
+record no.
+
+Con `ADS_ENABLED=false` risponde **404 e non un file vuoto**. È la differenza
+più facile da sbagliare del formato: un ads.txt assente vale «nessuna
+restrizione» e gli annunci continuano, uno presente ma vuoto vale «nessuno è
+autorizzato a vendere questo inventario» e li blocca su tutto il dominio.
+
 
 ## Struttura
 
