@@ -6,10 +6,11 @@ import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import "./globals.css";
 import { AdSlot } from "@/components/AdSlot";
+import { AdblockNotice } from "@/components/AdblockNotice";
 import { ConversionTracker } from "@/components/ConversionTracker";
 import { DivineLight } from "@/components/DivineLight";
 import { SiteHeader } from "@/components/SiteHeader";
-import { getAdsense } from "@/lib/ads";
+import { getAdblockNotice, getAdsense } from "@/lib/ads";
 import { HOLDER, legalDataMissing } from "@/lib/legal";
 
 const serif = Cormorant_Garamond({
@@ -52,6 +53,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const adsense = getAdsense();
+  const adblock = getAdblockNotice();
 
   return (
     <html lang="it" className={`${serif.variable} ${inter.variable}`}>
@@ -181,6 +183,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             strategy="afterInteractive"
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsense.client}`}
             crossOrigin="anonymous"
+          />
+        )}
+
+        {/* Chiede una volta a chi blocca la pubblicità, e poi tace per un
+            mese. Deliberatamente NON è un muro: vedi il componente. */}
+        {adblock.enabled && (
+          <AdblockNotice
+            dismissDays={adblock.dismissDays}
+            delaySeconds={adblock.delaySeconds}
           />
         )}
 

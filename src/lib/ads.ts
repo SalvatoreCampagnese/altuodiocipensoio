@@ -35,6 +35,14 @@ import "server-only";
 
 export type AdPlacement = "footer" | "articolo";
 
+export type AdblockNotice = {
+  enabled: boolean;
+  /** Per quanti giorni tacere dopo che l'utente ha chiuso l'avviso. */
+  dismissDays: number;
+  /** Secondi da aspettare prima di misurare, per non accusare una rete lenta. */
+  delaySeconds: number;
+};
+
 export type AdsenseConfig = {
   enabled: boolean;
   /** L'editore, nella forma `ca-pub-…`. È pubblico: sta nel tag dello script. */
@@ -70,6 +78,27 @@ export function getAdsense(): AdsenseConfig {
     // svista che si paga con l'account.
     testMode: readBool("ADSENSE_TEST_MODE", process.env.NODE_ENV !== "production"),
   };
+}
+
+/**
+ * L'avviso a chi ha un blocco pubblicità.
+ *
+ * `dismissDays` alto di proposito: un avviso che ricompare a ogni pagina non
+ * è un invito, è un fastidio, e su un sito dove si arriva con un lutto
+ * addosso diventa una cattiveria. Chiesto una volta, poi si tace per un mese.
+ */
+export function getAdblockNotice(): AdblockNotice {
+  return {
+    // Non ha senso senza pubblicità da bloccare.
+    enabled: getAdsense().enabled && readBool("ADBLOCK_NOTICE_ENABLED", true),
+    dismissDays: Math.max(1, readInt("ADBLOCK_NOTICE_DISMISS_DAYS", 30)),
+    delaySeconds: Math.max(1, readInt("ADBLOCK_NOTICE_DELAY_SECONDS", 3)),
+  };
+}
+
+function readInt(key: string, fallback: number): number {
+  const raw = Number.parseInt(process.env[key] || "", 10);
+  return Number.isFinite(raw) && raw > 0 ? raw : fallback;
 }
 
 /** L'unità per una posizione, se è stata configurata nel cruscotto. */

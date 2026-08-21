@@ -67,6 +67,15 @@ export default function CookiePage() {
                 <td className="py-2.5 text-xs">Definita da Stripe</td>
               </tr>
               <tr className="border-b border-gold/10 align-top">
+                <td className="py-2.5 pr-3">Avviso blocco pubblicità</td>
+                <td className="py-2.5 pr-3 text-xs">
+                  Se chiudi l&apos;avviso su un blocco pubblicità attivo, registriamo la tua
+                  scelta sul dispositivo per non ripetertelo. Non è un cookie e non lascia il
+                  tuo browser: nessuno lo legge, noi compresi.
+                </td>
+                <td className="py-2.5 text-xs">30 giorni</td>
+              </tr>
+              <tr className="border-b border-gold/10 align-top">
                 <td className="py-2.5 pr-3">Scelta sui cookie</td>
                 <td className="py-2.5 pr-3 text-xs">
                   Registra la risposta che dai al messaggio sul consenso, per non ripetertelo a

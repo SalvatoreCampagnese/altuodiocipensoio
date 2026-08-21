@@ -481,6 +481,31 @@ un `<ins>` senza `data-ad-slot` non si riempie mai e lascerebbe in pagina un
 box «Pubblicità» perennemente vuoto. Lo script si carica comunque, che è
 quanto serve agli annunci automatici — ed è la configurazione in uso.
 
+**Avviso a chi blocca la pubblicità** (`AdblockNotice.tsx`, `lib/adblock.ts`).
+Tre segnali indipendenti, perché nessuno li prende tutti: un'esca nel DOM per
+i filtri cosmetici (uBlock, AdBlock), una fetch che deve fallire per i filtri
+di rete, e la presenza dello script di Google. L'esca da sola basta; rete e
+script devono concordare, perché ciascuno da solo sbaglia — su localhost
+`window.adsbygoogle` risulta assente pur senza alcun blocco, e da solo
+accuserebbe un innocente.
+
+Restano fuori i casi che nessuna tecnica lato pagina può vedere: un proxy che
+serve uno script vuoto, un'estensione che simula il caricamento. **«Prenderli
+tutti» non è ottenibile** e prometterlo sarebbe falso.
+
+Non è un muro, per due motivi. Il primo è di merito: su un sito dove si arriva
+alle tre di notte per un lutto, una porta chiusa è una cattiveria. Il secondo è
+aritmetico: chi trova un blocco torna in SERP e clicca il risultato dopo, e un
+rimbalzo vale meno di zero. Si chiede una volta, si accetta il no, e si tace
+per `ADBLOCK_NOTICE_DISMISS_DAYS` giorni.
+
+Per provarlo senza installare nulla: `?adblock=test` su qualunque pagina.
+
+Alternativa ufficiale: AdSense ha una propria **Ad blocking recovery** in
+«Privacy e messaggi», integrata con la CMP. Se la accendi, spegni questa con
+`ADBLOCK_NOTICE_ENABLED=false` — due avvisi sullo stesso schermo sono peggio
+di nessuno.
+
 `ADSENSE_TEST_MODE` segue `NODE_ENV`: fuori produzione le unità hanno
 `data-adtest="on"`. Le impression da localhost o dalle anteprime sono traffico
 non valido, ed è il motivo più comune di sospensione di un account.
