@@ -23,6 +23,48 @@
  * è un avviso che si chiude — mai un muro.
  */
 
+/**
+ * È un crawler?
+ *
+ * QUESTA FUNZIONE È LA PIÙ DELICATA DEL FILE, e il motivo va detto per esteso
+ * perché non è ovvio.
+ *
+ * Con il muro attivo, chi non passa la rilevazione non vede il contenuto. Se
+ * un giorno Googlebot non passasse — per un cambio di user agent, per una sua
+ * rete che non raggiunge googlesyndication, per un timeout — vedrebbe una
+ * pagina senza testo. Ripetuto su tutte le pagine, quello non è un calo di
+ * posizioni: è la deindicizzazione del sito.
+ *
+ * Nota che mostrare a Googlebot il contenuto pieno NON è cloaking: non gli
+ * stiamo servendo qualcosa di diverso da quello che serviamo a una persona
+ * senza blocco pubblicitario, che è esattamente la stessa pagina. Il cloaking
+ * è dare al motore ciò che non dai all'utente; qui il muro cade per chiunque
+ * non blocchi la pubblicità, crawler compresi.
+ *
+ * L'elenco è volutamente largo e la logica volutamente permissiva: lasciar
+ * passare un bot di troppo non costa niente, murarne uno costa il traffico.
+ */
+const CRAWLER_HINTS = [
+  "bot", "crawl", "spider", "slurp", "googlebot", "bingbot", "duckduckbot",
+  "applebot", "yandex", "baiduspider", "facebookexternalhit", "twitterbot",
+  "linkedinbot", "whatsapp", "telegrambot", "discordbot", "embedly",
+  "quora link preview", "pinterest", "redditbot", "ahrefs", "semrush",
+  "mj12bot", "dotbot", "petalbot", "google-inspectiontool", "chrome-lighthouse",
+  "headlesschrome", "gptbot", "oai-searchbot", "perplexitybot", "claudebot",
+];
+
+export function isLikelyCrawler(): boolean {
+  if (typeof navigator === "undefined") return true; // nel dubbio, non murare
+
+  const ua = navigator.userAgent.toLowerCase();
+  if (CRAWLER_HINTS.some((hint) => ua.includes(hint))) return true;
+
+  // Browser pilotato da un'automazione: quasi sempre un crawler o un test.
+  if ((navigator as { webdriver?: boolean }).webdriver === true) return true;
+
+  return false;
+}
+
 /** Classi che praticamente ogni lista di filtri nasconde. */
 const BAIT_CLASSES = [
   "adsbox",
@@ -147,14 +189,32 @@ function scriptDidNotLoad(): boolean {
  * sbaglia troppo spesso: un firewall aziendale fa fallire la rete senza che
  * l'utente abbia installato niente, e uno script può mancare per mille motivi.
  */
-export async function detectAdblock(): Promise<boolean> {
+export async function detectAdblock(strict = false): Promise<boolean> {
   if (typeof window === "undefined") return false;
+  // Un crawler non blocca la pubblicità e non va mai murato. Vedi sopra.
+  if (isLikelyCrawler()) return false;
 
   try {
     const [bait, network] = await Promise.all([
       withTimeout(baitIsHidden(), 2000, false),
       withTimeout(networkIsBlocked(), 6000, false),
     ]);
+
+    /**
+     * `strict` alza la soglia, e serve quando la conseguenza è il muro.
+     *
+     * Con un avviso che si chiude, un falso positivo costa a chi lo riceve
+     * tre secondi di fastidio. Con il muro gli costa la pagina: qualcuno che
+     * cercava una preghiera per sua madre malata trova una porta chiusa per
+     * colpa del firewall del suo ufficio. Non è lo stesso errore, e non può
+     * avere la stessa soglia.
+     *
+     * In modalità severa il solo fallimento di rete non basta mai: serve la
+     * conferma dell'esca, cioè la prova che qualcosa sta davvero nascondendo
+     * elementi in questa pagina.
+     */
+    if (strict) return bait;
+
     return bait || (network && scriptDidNotLoad());
   } catch {
     // Nel dubbio, non accusare nessuno.

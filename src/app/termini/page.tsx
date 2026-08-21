@@ -235,6 +235,14 @@ export default function TermsPage() {
           .
         </p>
         <p>
+          <strong>Per leggere le pagine gratuite occorre disattivare l&apos;eventuale blocco
+          pubblicità.</strong> È la condizione a cui l&apos;archivio delle preghiere resta
+          libero e senza registrazione: se gli annunci non si vedono, non c&apos;è niente che
+          lo paghi. Quello che hai acquistato — le preghiere su misura, la Preghiera del
+          Giorno, le candele del Lucernario — <strong>resta accessibile in ogni caso</strong>:
+          nulla di ciò per cui hai pagato dipende dalla pubblicità.
+        </p>
+        <p>
           Anche i contenuti li sceglie Google: possiamo escludere categorie e singoli
           inserzionisti, ma non conoscerli uno per uno in anticipo. Se ne vedi uno
           inappropriato per il contesto — e su un sito come questo può succedere, perché una

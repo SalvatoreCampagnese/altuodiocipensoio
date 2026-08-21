@@ -493,7 +493,31 @@ Restano fuori i casi che nessuna tecnica lato pagina può vedere: un proxy che
 serve uno script vuoto, un'estensione che simula il caricamento. **«Prenderli
 tutti» non è ottenibile** e prometterlo sarebbe falso.
 
-Non è un muro, per due motivi. Il primo è di merito: su un sito dove si arriva
+**Modalità `blocco` (attiva).** Il contenuto non è leggibile finché il blocco
+pubblicità è attivo: `main` passa a `visibility:hidden`, lo scorrimento si
+ferma, e non ci sono X né Esc. Il bottone «L'ho disattivato» rimisura e, se è
+vero, ricarica da sé. `ADBLOCK_NOTICE_MODE=avviso` riporta tutto all'avviso
+gentile che si chiude.
+
+Due cose non negoziabili in questa modalità.
+
+1. **I crawler non vengono mai murati** — `isLikelyCrawler()` in
+   `lib/adblock.ts`. Se un giorno Googlebot non passasse la rilevazione
+   vedrebbe pagine senza testo, e su tutto il sito quello non è un calo di
+   posizioni: è la deindicizzazione. Non è cloaking, perché la pagina servita
+   è identica per tutti e il muro cade per chiunque non blocchi la pubblicità.
+   Verificato: 9 user agent di crawler passano, 5 di browser reali no.
+2. **La soglia si alza** — con `strict` il solo fallimento di rete non basta
+   più, serve la conferma dell'esca. Con un avviso un falso positivo costa tre
+   secondi di fastidio; con il muro costa la pagina a qualcuno che cercava una
+   preghiera per sua madre malata e ha soltanto il firewall dell'ufficio.
+
+Il testo resta nel DOM anche mentre è murato, quindi l'HTML servito non cambia
+di una riga: verificato, 2575 caratteri di testo visibile identici fra utente
+e Googlebot. Chi apre gli strumenti per sviluppatori può aggirarlo, come in
+qualunque muro lato browser mai scritto.
+
+Non era un muro, e i motivi per cui non lo era restano validi. Il primo è di merito: su un sito dove si arriva
 alle tre di notte per un lutto, una porta chiusa è una cattiveria. Il secondo è
 aritmetico: chi trova un blocco torna in SERP e clicca il risultato dopo, e un
 rimbalzo vale meno di zero. Si chiede una volta, si accetta il no, e si tace

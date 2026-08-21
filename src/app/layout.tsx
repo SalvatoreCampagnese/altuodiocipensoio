@@ -186,12 +186,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           />
         )}
 
-        {/* Chiede una volta a chi blocca la pubblicità, e poi tace per un
-            mese. Deliberatamente NON è un muro: vedi il componente. */}
+        {/* Muro per chi blocca la pubblicità (ADBLOCK_NOTICE_MODE=avviso lo
+            riporta a semplice avviso). I crawler non vengono mai murati: vedi
+            isLikelyCrawler() in lib/adblock.ts, che è la riga da cui dipende
+            l'indicizzazione dell'intero sito. */}
         {adblock.enabled && (
           <AdblockNotice
             dismissDays={adblock.dismissDays}
             delaySeconds={adblock.delaySeconds}
+            mode={adblock.mode}
           />
         )}
 

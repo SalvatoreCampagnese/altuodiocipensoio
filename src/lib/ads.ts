@@ -37,6 +37,11 @@ export type AdPlacement = "footer" | "articolo";
 
 export type AdblockNotice = {
   enabled: boolean;
+  /**
+   * `avviso` chiede e lascia entrare; `blocco` non lascia leggere finché il
+   * blocco pubblicità è attivo.
+   */
+  mode: "avviso" | "blocco";
   /** Per quanti giorni tacere dopo che l'utente ha chiuso l'avviso. */
   dismissDays: number;
   /** Secondi da aspettare prima di misurare, per non accusare una rete lenta. */
@@ -91,6 +96,7 @@ export function getAdblockNotice(): AdblockNotice {
   return {
     // Non ha senso senza pubblicità da bloccare.
     enabled: getAdsense().enabled && readBool("ADBLOCK_NOTICE_ENABLED", true),
+    mode: process.env.ADBLOCK_NOTICE_MODE?.trim() === "avviso" ? "avviso" : "blocco",
     dismissDays: Math.max(1, readInt("ADBLOCK_NOTICE_DISMISS_DAYS", 30)),
     delaySeconds: Math.max(1, readInt("ADBLOCK_NOTICE_DELAY_SECONDS", 3)),
   };
